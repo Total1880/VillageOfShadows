@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace VillageOfShadows.Core.Utils
+﻿namespace VillageOfShadows.Core.Utils
 {
     public sealed class RandomAdapter : IRandom
     {

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using VillageOfShadows.Core.Utils;
-using VillageOfShadows.Core.World;
 
 namespace VillageOfShadows.Core.Simulation;
 

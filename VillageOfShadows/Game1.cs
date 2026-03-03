@@ -1,7 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
+using VillageOfShadows.Core.Config;
+using VillageOfShadows.Core.Entities;
 using VillageOfShadows.Core.Simulation;
 using VillageOfShadows.Core.Utils;
 using VillageOfShadows.Core.World;
@@ -13,8 +14,6 @@ namespace VillageOfShadows
     {
         private GraphicsDeviceManager _graphics;
         private World _world = null!;
-        private Texture2D _grass = null!;
-        private Texture2D[] _trees = null!;
         private SpriteBatch _sb = null!;
         private Camera2D _camera = null!;
         private WorldSimulation _sim = null!;
@@ -34,21 +33,21 @@ namespace VillageOfShadows
         protected override void Initialize()
         {
             // Core
-            var config = new VillageOfShadows.Core.Config.WorldConfig { TileSize = 16 };
-            _world = new VillageOfShadows.Core.World.World(width: 120, height: 70, config);
+            var config = new WorldConfig { TileSize = 16 };
+            _world = new World(width: 120, height: 70, config);
 
             // Seed trees (zoals je al deed, of via system)
             _world.Get(20, 20).HasTree = true; // of maak een seed helper
 
             // Entities in Core
-            _world.Villagers.Add(new VillageOfShadows.Core.Entities.Villager(_world.TileCenter(10, 10)));
-            _world.Villagers.Add(new VillageOfShadows.Core.Entities.Villager(_world.TileCenter(14, 12)));
+            _world.Villagers.Add(new Villager(_world.TileCenter(10, 10)));
+            _world.Villagers.Add(new Villager(_world.TileCenter(14, 12)));
 
             // Simulation pipeline
-            _rng = new VillageOfShadows.Core.Utils.RandomAdapter(seed: 777);
-            _sim = new VillageOfShadows.Core.Simulation.WorldSimulation(_rng)
-                .AddSystem(new VillageOfShadows.Core.Simulation.TreeGrowthSystem())
-                .AddSystem(new VillageOfShadows.Core.Simulation.VillagerWanderSystem());
+            _rng = new RandomAdapter(seed: 777);
+            _sim = new WorldSimulation(_rng)
+                .AddSystem(new TreeGrowthSystem())
+                .AddSystem(new VillagerWanderSystem());
 
             // Camera
             _camera = new Camera2D { MinZoom = 0.5f, MaxZoom = 4f };
