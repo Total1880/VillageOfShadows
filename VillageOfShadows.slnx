@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="VillageOfShadows.Core/VillageOfShadows.Core.csproj" />
+  <Project Path="VillageOfShadows/VillageOfShadows.Game.csproj" />
+</Solution>
