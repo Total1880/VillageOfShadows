@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using VillageOfShadows.Core.Config;
+using VillageOfShadows.Core.Entities;
 
 namespace VillageOfShadows.Core.World;
 
@@ -12,7 +13,7 @@ public sealed class World
     public Tile[] Tiles { get; }
 
     // Entities (voor MVP: enkel villagers; later kan je hier uitbreiden)
-    public List<Entities.Villager> Villagers { get; } = new();
+    public List<Villager> Villagers { get; } = new();
 
     public World(int width, int height, WorldConfig config)
     {
