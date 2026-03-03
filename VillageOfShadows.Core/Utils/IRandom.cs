@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace VillageOfShadows.Core.Utils
+﻿namespace VillageOfShadows.Core.Utils
 {
-    internal interface IRandom
+    public interface IRandom
     {
+        int Next(int minInclusive, int maxExclusive);
+        double NextDouble();
     }
 }
