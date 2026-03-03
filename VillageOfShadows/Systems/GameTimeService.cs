@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VillageOfShadows.Game.GameFlow
+namespace VillageOfShadows.Game.Systems
 {
-    internal class GameManager
+    internal class GameTimeService
     {
     }
 }

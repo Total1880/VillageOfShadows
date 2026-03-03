@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace VillageOfShadows.Core.Domain
+namespace VillageOfShadows.Core.Config
 {
-    internal class Village
+    internal class WorldConfig
     {
     }
 }

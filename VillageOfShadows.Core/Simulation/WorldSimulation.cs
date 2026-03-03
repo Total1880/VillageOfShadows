@@ -4,7 +4,7 @@ using System.Text;
 
 namespace VillageOfShadows.Core.Simulation
 {
-    internal class NightOrder
+    internal class WorldSimulation
     {
     }
 }

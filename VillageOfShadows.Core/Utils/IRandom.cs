@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace VillageOfShadows.Core.Domain
+namespace VillageOfShadows.Core.Utils
 {
-    internal class Vampire
+    internal interface IRandom
     {
     }
 }

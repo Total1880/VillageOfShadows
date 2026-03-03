@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VillageOfShadows.Game.GameFlow
+namespace VillageOfShadows.Game.Rendering
 {
-    internal class GamePhase
+    internal class WorldRenderer
     {
     }
 }
