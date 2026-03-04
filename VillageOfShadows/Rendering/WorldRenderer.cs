@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using VillageOfShadows.Core.Entities;
 using VillageOfShadows.Core.World;
 
 namespace VillageOfShadows.Game.Rendering;
@@ -7,12 +8,12 @@ namespace VillageOfShadows.Game.Rendering;
 public sealed class WorldRenderer
 {
     private readonly Texture2D _grass;
-    private readonly Texture2D[] _trees;
+    private readonly IEntityRenderer _entityRenderer;
 
-    public WorldRenderer(Texture2D grass, Texture2D[] trees)
+    public WorldRenderer(Texture2D grass, IEntityRenderer entityRenderer)
     {
         _grass = grass;
-        _trees = trees;
+        _entityRenderer = entityRenderer;
     }
 
     public void Draw(SpriteBatch sb, World world)
@@ -26,13 +27,8 @@ public sealed class WorldRenderer
 
                 sb.Draw(_grass, new Rectangle(x * ts, y * ts, ts, ts), Color.White);
 
-                if (t.HasTree)
-                {
-                    var treeTex = _trees[(int)t.TreeStage];
-                    int drawX = x * ts + (ts / 2) - (treeTex.Width / 2);
-                    int drawY = y * ts + ts - treeTex.Height;
-                    sb.Draw(treeTex, new Vector2(drawX, drawY), Color.White);
-                }
+                if (t.Entity != null)
+                    _entityRenderer.Draw(sb, world, t.Entity, x, y);
             }
     }
 }

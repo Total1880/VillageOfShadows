@@ -11,23 +11,23 @@ public sealed class VillagerWanderSystem : IWorldSystem
 
         foreach (var v in world.Villagers)
         {
-            var toTarget = v.Target - v.Position;
+            var toTarget = v.Movement.Target - v.Position;
             float dist = toTarget.Length();
 
-            if (dist < cfg.VillagerRetargetDistancePx)
+            if (dist < 1)
             {
-                v.Target = PickRandomWalkableTarget(world, rng);
+                v.Movement.Target = PickRandomWalkableTarget(world, rng);
                 continue;
             }
 
             var dir = toTarget / dist;
-            var nextPos = v.Position + dir * cfg.VillagerSpeedPixelsPerSec * dt;
+            var nextPos = v.Position + dir * v.Movement.Speed * dt;
 
             // simpele collision: als volgende tile niet walkable is, kies nieuw target
             var nextTile = world.WorldToTile(nextPos);
             if (!world.IsWalkableTile(nextTile.X, nextTile.Y))
             {
-                v.Target = PickRandomWalkableTarget(world, rng);
+                v.Movement.Target = PickRandomWalkableTarget(world, rng);
                 continue;
             }
 

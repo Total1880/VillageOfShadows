@@ -1,4 +1,6 @@
-﻿using VillageOfShadows.Core.Utils;
+﻿using VillageOfShadows.Core.Entities;
+using VillageOfShadows.Core.Entities.Components;
+using VillageOfShadows.Core.Utils;
 using VillageOfShadows.Core.World;
 
 namespace VillageOfShadows.Core.Simulation;
@@ -13,34 +15,36 @@ public sealed class TreeGrowthSystem : IWorldSystem
             for (int x = 0; x < world.Width; x++)
             {
                 var t = world.Get(x, y);
-                if (!t.HasTree) continue;
+                if (t.Entity?.GetType() != typeof(Tree)) continue;
 
-                float g = t.TreeStage switch
+                var tree = t.Entity as Tree;
+
+                float g = tree.Stage switch
                 {
-                    TreeStage.Sapling => cfg.SaplingGrowthPerSec,
-                    TreeStage.Young => cfg.YoungGrowthPerSec,
+                    TreeStage.Sapling => tree.SaplingGrowthPerSec,
+                    TreeStage.Young => tree.YoungGrowthPerSec,
                     _ => 0f
                 };
 
                 if (g > 0f)
                 {
-                    t.TreeGrowth += g * dt;
-                    if (t.TreeGrowth >= 1f)
+                    tree.Growth += g * dt;
+                    if (tree.Growth >= 1f)
                     {
-                        t.TreeGrowth = 0f;
-                        if (t.TreeStage != TreeStage.Mature)
-                            t.TreeStage++;
+                        tree.Growth = 0f;
+                        if (tree.Stage != TreeStage.Mature)
+                            tree.Stage++;
                     }
                 }
-                else if (t.TreeStage == TreeStage.Mature)
+                else if (tree.Stage == TreeStage.Mature)
                 {
-                    if (rng.NextDouble() < cfg.MatureSpreadChancePerSec * dt)
-                        TrySpawnSaplingNear(world, x, y, rng);
+                    if (rng.NextDouble() < tree.MatureSpreadChancePerSec * dt)
+                        TrySpawnSaplingNear(world, x, y, rng, tree);
                 }
             }
     }
 
-    private static void TrySpawnSaplingNear(World.World world, int x, int y, IRandom rng)
+    private static void TrySpawnSaplingNear(World.World world, int x, int y, IRandom rng, Tree tree)
     {
         for (int attempt = 0; attempt < 6; attempt++)
         {
@@ -49,11 +53,10 @@ public sealed class TreeGrowthSystem : IWorldSystem
             if (!world.InBounds(nx, ny)) continue;
 
             var t = world.Get(nx, ny);
-            if (t.HasTree) continue;
+            if (t.Entity?.GetType() == typeof(Tree)) continue;
 
-            t.HasTree = true;
-            t.TreeStage = TreeStage.Sapling;
-            t.TreeGrowth = 0f;
+            t.Entity = tree.Create();
+
             return;
         }
     }

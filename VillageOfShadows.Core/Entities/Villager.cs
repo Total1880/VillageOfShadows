@@ -1,18 +1,21 @@
 ﻿using Microsoft.Xna.Framework;
+using VillageOfShadows.Core.Entities.Components;
 
 namespace VillageOfShadows.Core.Entities;
 
-public sealed class Villager
+public sealed class Villager : Entity
 {
-    public Guid Id { get; } = Guid.NewGuid();
-
-    // World-space in pixels
-    public Vector2 Position;
-    public Vector2 Target;
+    public Movement Movement;
 
     public Villager(Vector2 start)
     {
         Position = start;
-        Target = start;
+        Movement.Target = start;
+        Movement.Speed = 45f;
+    }
+
+    public override Entity Create()
+    {
+        return new Villager(new Vector2());
     }
 }

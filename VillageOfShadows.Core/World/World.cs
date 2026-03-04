@@ -37,5 +37,5 @@ public sealed class World
                ty * Config.TileSize + Config.TileSize / 2f);
 
     public bool IsWalkableTile(int tx, int ty)
-        => InBounds(tx, ty) && !Get(tx, ty).HasTree; // later: buildings/water etc.
+        => InBounds(tx, ty) && Get(tx, ty).Entity == null; // later: buildings/water etc.
 }

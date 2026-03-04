@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using VillageOfShadows.Core.Entities.Components;
 using VillageOfShadows.Core.World;
 
 public static class TextureFactory

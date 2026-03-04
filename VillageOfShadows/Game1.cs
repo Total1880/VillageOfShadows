@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using VillageOfShadows.Core.Config;
 using VillageOfShadows.Core.Entities;
+using VillageOfShadows.Core.Entities.Components;
 using VillageOfShadows.Core.Simulation;
 using VillageOfShadows.Core.Utils;
 using VillageOfShadows.Core.World;
@@ -12,15 +13,16 @@ namespace VillageOfShadows
 {
     public class Game1 : Microsoft.Xna.Framework.Game
     {
-        private GraphicsDeviceManager _graphics;
+        private readonly GraphicsDeviceManager _graphics;
+
         private World _world = null!;
         private SpriteBatch _sb = null!;
         private Camera2D _camera = null!;
         private WorldSimulation _sim = null!;
         private IRandom _rng = null!;
         private int _prevScroll;
+
         private WorldRenderer _worldRenderer = null!;
-        private EntityRenderer _entityRenderer = null!;
         private Texture2D _pixel = null!;
 
         public Game1()
@@ -36,10 +38,10 @@ namespace VillageOfShadows
             var config = new WorldConfig { TileSize = 16 };
             _world = new World(width: 120, height: 70, config);
 
-            // Seed trees (zoals je al deed, of via system)
-            _world.Get(20, 20).HasTree = true; // of maak een seed helper
+            // Seed trees (tile entity)
+            _world.Get(20, 20).Entity = new PineTree();
 
-            // Entities in Core
+            // Seed villagers (list entities)
             _world.Villagers.Add(new Villager(_world.TileCenter(10, 10)));
             _world.Villagers.Add(new Villager(_world.TileCenter(14, 12)));
 
@@ -60,22 +62,28 @@ namespace VillageOfShadows
         {
             _sb = new SpriteBatch(GraphicsDevice);
 
-            // 1x1 pixel (als je die nog niet had)
+            // 1x1 pixel
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
             _pixel.SetData(new[] { Color.White });
 
-            // textures
+            // Textures
             var grass = TextureFactory.CreateGrass(GraphicsDevice, size: 16, seed: 1337);
+
             var trees = new[]
             {
-    TextureFactory.CreateTreeStage(GraphicsDevice, TreeStage.Sapling),
-    TextureFactory.CreateTreeStage(GraphicsDevice, TreeStage.Young),
-    TextureFactory.CreateTreeStage(GraphicsDevice, TreeStage.Mature),
-};
+                TextureFactory.CreateTreeStage(GraphicsDevice, TreeStage.Sapling),
+                TextureFactory.CreateTreeStage(GraphicsDevice, TreeStage.Young),
+                TextureFactory.CreateTreeStage(GraphicsDevice, TreeStage.Mature),
+            };
 
-            // renderers
-            _worldRenderer = new WorldRenderer(grass, trees);
-            _entityRenderer = new EntityRenderer(_pixel);
+            // Entity rendering pipeline (dispatcher)
+            IEntityRenderer entityRenderer = new EntityRenderer(
+                new TreeRenderer(trees)
+                //new VillagerRenderer(_pixel) // tekent _world.Villagers
+            );
+
+            // World renderer tekent tiles + tile-entities via entityRenderer
+            _worldRenderer = new WorldRenderer(grass, entityRenderer);
         }
 
         protected override void Update(GameTime gameTime)
@@ -91,14 +99,16 @@ namespace VillageOfShadows
             base.Update(gameTime);
         }
 
-
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
 
-            _sb.Begin(samplerState: SamplerState.PointClamp, transformMatrix: _camera.GetViewMatrix());
+            _sb.Begin(
+                samplerState: SamplerState.PointClamp,
+                transformMatrix: _camera.GetViewMatrix());
+
             _worldRenderer.Draw(_sb, _world);
-            _entityRenderer.DrawVillagers(_sb, _world);
+
             _sb.End();
 
             base.Draw(gameTime);
@@ -109,10 +119,9 @@ namespace VillageOfShadows
             var kb = Keyboard.GetState();
             var ms = Mouse.GetState();
 
-            float panSpeed = 600f; // world pixels per second
+            float panSpeed = 600f;
             Vector2 move = Vector2.Zero;
 
-            // --- Movement ---
             if (kb.IsKeyDown(Keys.W) || kb.IsKeyDown(Keys.Up)) move.Y -= 1;
             if (kb.IsKeyDown(Keys.S) || kb.IsKeyDown(Keys.Down)) move.Y += 1;
             if (kb.IsKeyDown(Keys.A) || kb.IsKeyDown(Keys.Left)) move.X -= 1;
@@ -121,12 +130,9 @@ namespace VillageOfShadows
             if (move != Vector2.Zero)
             {
                 move.Normalize();
-
-                // Divide by zoom so pan feels consistent
                 _camera.Move(move * (panSpeed * dt) / _camera.Zoom);
             }
 
-            // --- Zoom ---
             int scroll = ms.ScrollWheelValue;
             int delta = scroll - _prevScroll;
             _prevScroll = scroll;
@@ -134,17 +140,11 @@ namespace VillageOfShadows
             if (delta != 0)
             {
                 float zoomFactor = delta > 0 ? 1.10f : 0.90f;
-
-                _camera.ZoomAtScreenPoint(
-                    zoomFactor,
-                    ms.Position.ToVector2(),
-                    GraphicsDevice);
+                _camera.ZoomAtScreenPoint(zoomFactor, ms.Position.ToVector2(), GraphicsDevice);
             }
 
-            // --- Clamp inside world ---
             int worldPixelW = _world.Width * _world.Config.TileSize;
             int worldPixelH = _world.Height * _world.Config.TileSize;
-
             _camera.ClampToWorld(worldPixelW, worldPixelH, GraphicsDevice);
         }
     }
