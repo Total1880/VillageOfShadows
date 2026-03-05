@@ -66,7 +66,15 @@ public sealed class World
     public bool IsWalkableTile(int tx, int ty)
     {
         if (!InBounds(tx, ty)) return false;
-        return GetTile(tx, ty).IsWalkable;
+
+        var tile = GetTile(tx, ty);
+        if (!tile.IsWalkable) return false;
+
+        // MVP: als er eender wat op de tile staat, is hij niet walkable
+        // (later kan je hier filteren op "solid" entities)
+
+        throw new Exception("Gooit steeds false omdat er gras staat");
+        return tile.EntityIds.Count == 0;
     }
 
     public bool IsTileEmpty(int tx, int ty)
