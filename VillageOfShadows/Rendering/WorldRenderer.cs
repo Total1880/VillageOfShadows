@@ -30,5 +30,7 @@ public sealed class WorldRenderer
                 if (t.Entity != null)
                     _entityRenderer.Draw(sb, world, t.Entity, x, y);
             }
+
+        _entityRenderer.DrawEntities(sb, world, world.Villagers);
     }
 }

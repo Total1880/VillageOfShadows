@@ -10,5 +10,6 @@ namespace VillageOfShadows.Game.Rendering
     public interface IEntityRenderer
     {
         void Draw(SpriteBatch sb, World world, Entity e, int tileX, int tileY);
+        void DrawEntities(SpriteBatch sb, World world, IEnumerable<Entity> entities);
     }
 }

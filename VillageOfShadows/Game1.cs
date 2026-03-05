@@ -37,16 +37,17 @@ namespace VillageOfShadows
             // Core
             var config = new WorldConfig { TileSize = 16 };
             _world = new World(width: 120, height: 70, config);
+            _rng = new RandomAdapter(seed: 778);
 
             // Seed trees (tile entity)
-            _world.Get(20, 20).Entity = new PineTree();
+            _world.Get(_rng.Next(5, 30), _rng.Next(5, 30)).Entity = new PineTree();
+            _world.Get(_rng.Next(5, 30), _rng.Next(5, 30)).Entity = new OakTree();
 
             // Seed villagers (list entities)
             _world.Villagers.Add(new Villager(_world.TileCenter(10, 10)));
             _world.Villagers.Add(new Villager(_world.TileCenter(14, 12)));
 
             // Simulation pipeline
-            _rng = new RandomAdapter(seed: 777);
             _sim = new WorldSimulation(_rng)
                 .AddSystem(new TreeGrowthSystem())
                 .AddSystem(new VillagerWanderSystem());
@@ -69,17 +70,11 @@ namespace VillageOfShadows
             // Textures
             var grass = TextureFactory.CreateGrass(GraphicsDevice, size: 16, seed: 1337);
 
-            var trees = new[]
-            {
-                TextureFactory.CreateTreeStage(GraphicsDevice, TreeStage.Sapling),
-                TextureFactory.CreateTreeStage(GraphicsDevice, TreeStage.Young),
-                TextureFactory.CreateTreeStage(GraphicsDevice, TreeStage.Mature),
-            };
-
             // Entity rendering pipeline (dispatcher)
             IEntityRenderer entityRenderer = new EntityRenderer(
-                new TreeRenderer(trees)
-                //new VillagerRenderer(_pixel) // tekent _world.Villagers
+                new PineTreeRenderer(_pixel),
+                new OakTreeRenderer(_pixel),
+                new VillagerRenderer(_pixel)
             );
 
             // World renderer tekent tiles + tile-entities via entityRenderer

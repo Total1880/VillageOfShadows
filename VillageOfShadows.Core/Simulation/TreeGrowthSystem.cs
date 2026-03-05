@@ -15,7 +15,7 @@ public sealed class TreeGrowthSystem : IWorldSystem
             for (int x = 0; x < world.Width; x++)
             {
                 var t = world.Get(x, y);
-                if (t.Entity?.GetType() != typeof(Tree)) continue;
+                if (t.Entity is not Tree) continue;
 
                 var tree = t.Entity as Tree;
 

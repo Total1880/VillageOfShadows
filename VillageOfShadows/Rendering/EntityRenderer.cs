@@ -32,17 +32,13 @@ public sealed class EntityRenderer : IEntityRenderer
         // throw new InvalidOperationException($"No renderer for {entity.GetType().Name}");
     }
 
-    //public void DrawVillagers(SpriteBatch sb, World world)
-    //{
-    //    foreach (var v in world.Villagers)
-    //    {
-    //        int size = 6;
-    //        var rect = new Rectangle(
-    //            (int)(v.Position.X - size / 2f),
-    //            (int)(v.Position.Y - size / 2f),
-    //            size, size);
-
-    //        sb.Draw(_pixel, rect, Color.LightBlue);
-    //    }
-    //}
+    public void DrawEntities(SpriteBatch sb, World world, IEnumerable<Entity> entities)
+    {
+        foreach (var e in entities)
+        {
+            int tileX = (int)(e.Position.X / world.Config.TileSize);
+            int tileY = (int)(e.Position.Y / world.Config.TileSize);
+            Draw(sb, world, e, tileX, tileY);
+        }
+    }
 }
