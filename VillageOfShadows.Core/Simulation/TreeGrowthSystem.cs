@@ -35,6 +35,10 @@ public sealed class TreeGrowthSystem : IWorldSystem
                         if (tree.Stage != TreeStage.Mature)
                             tree.Stage++;
                     }
+                    if (tree.HasFood && tree.MaxFoodValue > tree.FoodValue)
+                    {
+                        tree.FoodValue += tree.FoodGrowthPerSec * dt;
+                    }
                 }
                 else if (tree.Stage == TreeStage.Mature)
                 {

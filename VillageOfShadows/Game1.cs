@@ -42,6 +42,7 @@ namespace VillageOfShadows
             // Seed trees (tile entity)
             _world.Get(_rng.Next(5, 30), _rng.Next(5, 30)).Entity = new PineTree();
             _world.Get(_rng.Next(5, 30), _rng.Next(5, 30)).Entity = new OakTree();
+            _world.Get(_rng.Next(5, 30), _rng.Next(5, 30)).Entity = new AppleTree();
 
             // Seed villagers (list entities)
             _world.Villagers.Add(new Villager(_world.TileCenter(10, 10)));
@@ -74,6 +75,7 @@ namespace VillageOfShadows
             IEntityRenderer entityRenderer = new EntityRenderer(
                 new PineTreeRenderer(_pixel),
                 new OakTreeRenderer(_pixel),
+                new AppleTreeRenderer(_pixel),
                 new VillagerRenderer(_pixel)
             );
 

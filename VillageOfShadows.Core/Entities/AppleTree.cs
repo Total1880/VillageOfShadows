@@ -1,0 +1,24 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace VillageOfShadows.Core.Entities
+{
+    public sealed class AppleTree : Tree
+    {
+        public AppleTree()
+        {
+            SaplingGrowthPerSec = 0.033f;
+            YoungGrowthPerSec = 0.022f;
+            MatureSpreadChancePerSec = 0.0028f;
+            FoodGrowthPerSec = 0.050f;
+            HasFood = true;
+            MaxFoodValue = 6;
+        }
+
+        public override Entity Create()
+        {
+            return new AppleTree();
+        }
+    }
+}
