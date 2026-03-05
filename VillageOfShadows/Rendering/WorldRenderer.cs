@@ -23,14 +23,15 @@ public sealed class WorldRenderer
         for (int y = 0; y < world.Height; y++)
             for (int x = 0; x < world.Width; x++)
             {
-                var t = world.Get(x, y);
+                var t = world.GetEntitiesPerPosition(x, y);
 
                 sb.Draw(_grass, new Rectangle(x * ts, y * ts, ts, ts), Color.White);
 
-                if (t.Entity != null)
-                    _entityRenderer.Draw(sb, world, t.Entity, x, y);
+                foreach (var e in t)
+                    if (t != null)
+                        _entityRenderer.Draw(sb, world, e, x, y);
             }
 
-        _entityRenderer.DrawEntities(sb, world, world.Villagers);
+        _entityRenderer.DrawEntities(sb, world, world.GetEntities<Villager>());
     }
 }

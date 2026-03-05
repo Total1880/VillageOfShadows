@@ -27,9 +27,6 @@ public sealed class EntityRenderer : IEntityRenderer
                 return;
             }
         }
-
-        // niets gevonden => gewoon niets tekenen (of debug)
-        // throw new InvalidOperationException($"No renderer for {entity.GetType().Name}");
     }
 
     public void DrawEntities(SpriteBatch sb, World world, IEnumerable<Entity> entities)

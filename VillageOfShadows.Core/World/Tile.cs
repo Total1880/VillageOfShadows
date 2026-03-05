@@ -5,7 +5,7 @@ namespace VillageOfShadows.Core.World
     public sealed class Tile
     {
         public TileType Type;
-        public Entity? Entity;
+        public List<EntityId> EntityIds;
         public bool isWalkable;
     }
 }

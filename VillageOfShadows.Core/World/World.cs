@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Drawing;
+using System.Numerics;
 using VillageOfShadows.Core.Config;
 using VillageOfShadows.Core.Entities;
 
@@ -12,8 +13,7 @@ public sealed class World
 
     public Tile[] Tiles { get; }
 
-    // Entities (voor MVP: enkel villagers; later kan je hier uitbreiden)
-    public List<Villager> Villagers { get; } = new();
+    public Dictionary<EntityId, Entity> Entities { get; set; }
 
     public World(int width, int height, WorldConfig config)
     {
@@ -27,7 +27,6 @@ public sealed class World
     }
 
     public bool InBounds(int x, int y) => x >= 0 && y >= 0 && x < Width && y < Height;
-    public Tile Get(int x, int y) => Tiles[y * Width + x];
 
     public Point WorldToTile(Vector2 worldPos)
         => new((int)(worldPos.X / Config.TileSize), (int)(worldPos.Y / Config.TileSize));
@@ -37,5 +36,41 @@ public sealed class World
                ty * Config.TileSize + Config.TileSize / 2f);
 
     public bool IsWalkableTile(int tx, int ty)
-        => InBounds(tx, ty) && Get(tx, ty).Entity == null; // later: buildings/water etc.
+        => InBounds(tx, ty);
+
+    public void AddEntity(Entity entity)
+    {
+        Entities.Add(entity.EntityId, entity);
+    }
+    public void RemoveEntity(EntityId id) { }
+    public void TryGetEntity(EntityId id, out Entity e)
+    {
+        if (Entities.TryGetValue(id, out var entity))
+        {
+            e = entity;
+            return;
+        }
+
+        e = null!;
+    }
+    public bool TryPlaceEntityOnTile(Entity e, int x, int y)
+    {
+        if (IsWalkableTile(x, y) && InBounds(x, y))
+        {
+            AddEntity(e);
+            Tiles[x * y].EntityIds.Add(e.EntityId);
+            e.Position = new Vector2(x, y);
+            return true;
+        }
+        return false;
+    }
+    public IEnumerable<T> GetEntities<T>()
+    {
+        return Entities.Values.OfType<T>();
+    }
+
+    public IList<Entity> GetEntitiesPerPosition(int x, int y)
+    {
+        return Entities.Where(_ => _.Value.Position.Y == y && _.Value.Position.X == x).Select(_ => _.Value).ToList();
+    }
 }

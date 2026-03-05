@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Numerics;
 using VillageOfShadows.Core.Utils;
 
 namespace VillageOfShadows.Core.Simulation;

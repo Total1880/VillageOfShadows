@@ -1,13 +1,11 @@
-﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Numerics;
 
 namespace VillageOfShadows.Core.Entities
 {
     public abstract class Entity
     {
-        public Guid Id { get; } = Guid.NewGuid();
+        public EntityId EntityId;
+        public Guid Id { get => EntityId.Value; }
         public Vector2 Position;
         public abstract Entity Create();
     }

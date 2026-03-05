@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using VillageOfShadows.Core.Entities.Components;
-using VillageOfShadows.Core.World;
+﻿using VillageOfShadows.Core.Entities.Components;
 
 namespace VillageOfShadows.Core.Entities
 {
