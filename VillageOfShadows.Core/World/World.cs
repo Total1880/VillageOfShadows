@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using VillageOfShadows.Core.Config;
 using VillageOfShadows.Core.Entities;
 
@@ -27,51 +28,135 @@ public sealed class World
             Tiles[i] = new Tile { Type = TileType.Grass };
     }
 
-    public bool InBounds(int x, int y) => x >= 0 && y >= 0 && x < Width && y < Height;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool InBounds(int tx, int ty)
+           => tx >= 0 && ty >= 0 && tx < Width && ty < Height;
 
-    public Point WorldToTile(Vector2 worldPos)
-        => new((int)(worldPos.X / Config.TileSize), (int)(worldPos.Y / Config.TileSize));
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int Index(int tx, int ty)
+        => ty * Width + tx;
 
-    public Vector2 TileCenter(int tx, int ty)
-        => new(tx * Config.TileSize + Config.TileSize / 2f,
-               ty * Config.TileSize + Config.TileSize / 2f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Tile GetTile(int tx, int ty)
+        => Tiles[Index(tx, ty)];
+
+    // --- Coordinate conversions -----------------------------------------
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public (int tx, int ty) WorldToTile(Vector2 worldPos)
+    {
+        int tx = (int)(worldPos.X / Config.TileSize);
+        int ty = (int)(worldPos.Y / Config.TileSize);
+        return (tx, ty);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Vector2 TileToWorldTopLeft(int tx, int ty)
+        => new(tx * Config.TileSize, ty * Config.TileSize);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Vector2 TileToWorldCenter(int tx, int ty)
+        => new(
+            tx * Config.TileSize + Config.TileSize * 0.5f,
+            ty * Config.TileSize + Config.TileSize * 0.5f
+        );
+
+    // --- Tile state helpers ---------------------------------------------
 
     public bool IsWalkableTile(int tx, int ty)
-        => InBounds(tx, ty);
+    {
+        if (!InBounds(tx, ty)) return false;
+        return GetTile(tx, ty).IsWalkable;
+    }
+
+    public bool IsTileEmpty(int tx, int ty)
+    {
+        if (!InBounds(tx, ty)) return false;
+        return GetTile(tx, ty).EntityIds.Count == 0;
+    }
+
+    // --- Entity registry -------------------------------------------------
+
+    public bool TryGetEntity(EntityId id, out Entity entity)
+        => Entities.TryGetValue(id, out entity);
 
     public void AddEntity(Entity entity)
-    {
-        Entities.Add(entity.EntityId, entity);
-    }
-    public void RemoveEntity(EntityId id) { }
-    public void TryGetEntity(EntityId id, out Entity e)
-    {
-        if (Entities.TryGetValue(id, out var entity))
-        {
-            e = entity;
-            return;
-        }
+        => Entities[entity.EntityId] = entity; // pas aan als je property anders heet
 
-        e = null!;
-    }
-    public bool TryPlaceEntityOnTile(Entity e, int x, int y)
+    public bool RemoveEntity(EntityId id)
+        => Entities.Remove(id);
+
+    // --- Tile <-> Entity relations --------------------------------------
+
+    /// <summary>
+    /// Zet entity in registry + voegt Id toe aan tile + zet entity.Position naar tile-center.
+    /// </summary>
+    public bool TryPlaceEntityOnTile(Entity entity, int tx, int ty)
     {
-        if (IsWalkableTile(x, y) && InBounds(x, y))
-        {
-            AddEntity(e);
-            Tiles[x * y].EntityIds.Add(e.EntityId);
-            e.Position = new Vector2(x, y);
-            return true;
-        }
-        return false;
-    }
-    public IEnumerable<T> GetEntities<T>()
-    {
-        return Entities.Values.OfType<T>();
+        if (!InBounds(tx, ty)) return false;
+
+        var tile = GetTile(tx, ty);
+        if (!tile.IsWalkable) return false;
+
+        AddEntity(entity);
+
+        // voorkom dubbel toevoegen (kan gebeuren bij re-place)
+        if (!tile.EntityIds.Contains(entity.EntityId))
+            tile.EntityIds.Add(entity.EntityId);
+
+        entity.Position = TileToWorldCenter(tx, ty);
+        return true;
     }
 
-    public IList<Entity> GetEntitiesPerPosition(int x, int y)
+    /// <summary>
+    /// Verplaatst enkel de tile-link + update Position. Registry blijft hetzelfde.
+    /// </summary>
+    public bool TryMoveEntityToTile(EntityId entityId, int toTx, int toTy)
     {
-        return Entities.Where(_ => _.Value.Position.Y == y && _.Value.Position.X == x).Select(_ => _.Value).ToList();
+        if (!TryGetEntity(entityId, out var entity)) return false;
+        if (!InBounds(toTx, toTy)) return false;
+
+        // haal uit huidige tile op basis van huidige Position
+        var (fromTx, fromTy) = WorldToTile(entity.Position);
+        if (InBounds(fromTx, fromTy))
+        {
+            GetTile(fromTx, fromTy).EntityIds.Remove(entityId);
+        }
+
+        var toTile = GetTile(toTx, toTy);
+        if (!toTile.IsWalkable) return false;
+
+        if (!toTile.EntityIds.Contains(entityId))
+            toTile.EntityIds.Add(entityId);
+
+        entity.Position = TileToWorldCenter(toTx, toTy);
+        return true;
+    }
+
+    /// <summary>
+    /// Geeft alle entities op een tile (safety: filtert ids die niet meer bestaan).
+    /// </summary>
+    public IEnumerable<Entity> GetEntitiesOnTile(int tx, int ty)
+    {
+        if (!InBounds(tx, ty)) yield break;
+
+        var ids = GetTile(tx, ty).EntityIds;
+        for (int i = 0; i < ids.Count; i++)
+        {
+            if (Entities.TryGetValue(ids[i], out var e))
+                yield return e;
+        }
+    }
+
+    /// <summary>
+    /// Handig voor systems: “alle trees”, “alle villagers”, etc.
+    /// </summary>
+    public IEnumerable<T> GetEntities<T>() where T : Entity
+    {
+        foreach (var e in Entities.Values)
+        {
+            if (e is T t) yield return t;
+        }
     }
 }
+

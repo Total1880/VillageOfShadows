@@ -6,6 +6,6 @@ namespace VillageOfShadows.Core.World
     {
         public TileType Type;
         public List<EntityId> EntityIds = new();
-        public bool IsWalkable;
+        public bool IsWalkable { get; set; } = true;
     }
 }

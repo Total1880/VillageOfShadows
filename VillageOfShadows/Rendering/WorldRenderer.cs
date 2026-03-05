@@ -23,7 +23,7 @@ public sealed class WorldRenderer
         for (int y = 0; y < world.Height; y++)
             for (int x = 0; x < world.Width; x++)
             {
-                var t = world.GetEntitiesPerPosition(x, y);
+                var t = world.GetEntitiesOnTile(x, y);
 
                 sb.Draw(_grass, new Rectangle(x * ts, y * ts, ts, ts), Color.White);
 

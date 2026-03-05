@@ -26,7 +26,7 @@ public sealed class VillagerWanderSystem : IWorldSystem
 
             // simpele collision: als volgende tile niet walkable is, kies nieuw target
             var nextTile = world.WorldToTile(nextPos);
-            if (!world.IsWalkableTile(nextTile.X, nextTile.Y))
+            if (!world.IsWalkableTile(nextTile.tx, nextTile.ty))
             {
                 v.Movement.Target = PickRandomWalkableTarget(world, rng);
                 continue;
@@ -43,10 +43,10 @@ public sealed class VillagerWanderSystem : IWorldSystem
             int tx = rng.Next(0, world.Width);
             int ty = rng.Next(0, world.Height);
             if (world.IsWalkableTile(tx, ty))
-                return world.TileCenter(tx, ty);
+                return world.TileToWorldCenter(tx, ty);
         }
 
         // fallback: gewoon ergens
-        return world.TileCenter(rng.Next(0, world.Width), rng.Next(0, world.Height));
+        return world.TileToWorldCenter(rng.Next(0, world.Width), rng.Next(0, world.Height));
     }
 }
