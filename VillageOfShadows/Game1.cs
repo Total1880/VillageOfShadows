@@ -40,13 +40,14 @@ namespace VillageOfShadows
             _rng = new RandomAdapter(seed: 778);
 
             // Seed trees (tile entity)
-            _world.Get(_rng.Next(5, 30), _rng.Next(5, 30)).Entity = new PineTree();
-            _world.Get(_rng.Next(5, 30), _rng.Next(5, 30)).Entity = new OakTree();
-            _world.Get(_rng.Next(5, 30), _rng.Next(5, 30)).Entity = new AppleTree();
+            _world.TryPlaceEntityOnTile(new PineTree(), _rng.Next(5, 30), _rng.Next(5, 30));
+            _world.TryPlaceEntityOnTile(new OakTree(), _rng.Next(5, 30), _rng.Next(5, 30));
+            _world.TryPlaceEntityOnTile(new AppleTree(), _rng.Next(5, 30), _rng.Next(5, 30));
 
             // Seed villagers (list entities)
-            _world.Villagers.Add(new Villager(_world.TileCenter(10, 10)));
-            _world.Villagers.Add(new Villager(_world.TileCenter(14, 12)));
+            _world.TryPlaceEntityOnTile(new Villager(), _rng.Next(5, 30), _rng.Next(5, 30));
+            _world.TryPlaceEntityOnTile(new Villager(), _rng.Next(5, 30), _rng.Next(5, 30));
+
 
             // Simulation pipeline
             _sim = new WorldSimulation(_rng)

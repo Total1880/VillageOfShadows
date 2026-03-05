@@ -14,6 +14,11 @@ public sealed class Villager : Entity
         Movement.Speed = 45f;
     }
 
+    public Villager()
+    {
+        Create();
+    }
+
     public override Entity Create()
     {
         return new Villager(new Vector2());

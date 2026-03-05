@@ -8,6 +8,10 @@ public readonly struct EntityId
     {
         Value = value;
     }
+    public EntityId()
+    {
+        New();
+    }
 
     public static EntityId New() => new(Guid.NewGuid());
 

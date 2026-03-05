@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using VillageOfShadows.Core.Entities;
 using VillageOfShadows.Core.Utils;
 
 namespace VillageOfShadows.Core.Simulation;
@@ -9,7 +10,7 @@ public sealed class VillagerWanderSystem : IWorldSystem
     {
         var cfg = world.Config;
 
-        foreach (var v in world.Villagers)
+        foreach (var v in world.GetEntities<Villager>())
         {
             var toTarget = v.Movement.Target - v.Position;
             float dist = toTarget.Length();

@@ -20,6 +20,7 @@ public sealed class World
         Width = width;
         Height = height;
         Config = config;
+        Entities = new Dictionary<EntityId, Entity>();
 
         Tiles = new Tile[width * height];
         for (int i = 0; i < Tiles.Length; i++)
