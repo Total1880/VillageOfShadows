@@ -21,16 +21,20 @@ public sealed class WorldRenderer
         int ts = world.Config.TileSize;
 
         for (int y = 0; y < world.Height; y++)
+        {
             for (int x = 0; x < world.Width; x++)
             {
-                var t = world.GetEntitiesOnTile(x, y);
-
                 sb.Draw(_grass, new Rectangle(x * ts, y * ts, ts, ts), Color.White);
 
-                foreach (var e in t)
-                    if (t != null)
-                        _entityRenderer.Draw(sb, world, e, x, y);
+                foreach (var entity in world.GetEntitiesOnTile(x, y))
+                {
+                    if (entity is Villager)
+                        continue; // villagers renderen we apart
+
+                    _entityRenderer.Draw(sb, world, entity, x, y);
+                }
             }
+        }
 
         _entityRenderer.DrawEntities(sb, world, world.GetEntities<Villager>());
     }

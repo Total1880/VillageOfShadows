@@ -1,4 +1,6 @@
-﻿namespace VillageOfShadows.Core.Entities
+﻿using VillageOfShadows.Core.Entities.Components;
+
+namespace VillageOfShadows.Core.Entities
 {
     public sealed class PineTree : Tree
     {
@@ -9,9 +11,12 @@
             MatureSpreadChancePerSec = 0.0025f;
         }
 
-        public override Entity Create()
+        public override Tree CreateSapling()
         {
-            return new PineTree();
+            return new PineTree
+            {
+                Stage = TreeStage.Sapling
+            };
         }
     }
 }

@@ -14,13 +14,7 @@ public sealed class Villager : Entity
         Movement.Speed = 45f;
     }
 
-    public Villager()
+    public Villager() : this(Vector2.Zero)
     {
-        Create();
-    }
-
-    public override Entity Create()
-    {
-        return new Villager(new Vector2());
     }
 }

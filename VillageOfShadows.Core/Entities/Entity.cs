@@ -1,12 +1,12 @@
 ﻿using System.Numerics;
 
-namespace VillageOfShadows.Core.Entities
+namespace VillageOfShadows.Core.Entities;
+
+public abstract class Entity
 {
-    public abstract class Entity
-    {
-        public EntityId EntityId = EntityId.New();
-        public Guid Id { get => EntityId.Value; }
-        public Vector2 Position;
-        public abstract Entity Create();
-    }
+    public EntityId EntityId { get; } = EntityId.New();
+    public Guid Id => EntityId.Value;
+    public Vector2 Position;
+
+    public virtual bool BlocksMovement => true;
 }

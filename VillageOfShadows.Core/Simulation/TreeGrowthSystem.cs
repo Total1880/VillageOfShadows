@@ -50,7 +50,7 @@ public sealed class TreeGrowthSystem : IWorldSystem
             int nx = x + rng.Next(-2, 3);
             int ny = y + rng.Next(-2, 3);
 
-            if (world.TryPlaceEntityOnTile(tree.Create(), nx, ny))
+            if (world.TryPlaceEntityOnTile(tree.CreateSapling(), nx, ny))
                 return;
         }
     }

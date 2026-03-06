@@ -1,4 +1,6 @@
-﻿namespace VillageOfShadows.Core.Entities
+﻿using VillageOfShadows.Core.Entities.Components;
+
+namespace VillageOfShadows.Core.Entities
 {
     public sealed class AppleTree : Tree
     {
@@ -12,9 +14,13 @@
             MaxFoodValue = 6;
         }
 
-        public override Entity Create()
+        public override Tree CreateSapling()
         {
-            return new AppleTree();
+            return new AppleTree
+            {
+                Stage = TreeStage.Sapling,
+                FoodValue = FoodValue
+            };
         }
     }
 }

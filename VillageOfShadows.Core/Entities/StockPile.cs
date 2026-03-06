@@ -6,12 +6,5 @@
         {
             MaxInventory = 100;
         }
-        public override Entity Create()
-        {
-            return new StockPile
-            {
-                Inventory = []
-            };
-        }
     }
 }

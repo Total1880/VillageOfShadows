@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.Linq;
 using VillageOfShadows.Core.Entities;
@@ -20,10 +19,10 @@ public sealed class EntityRenderer : IEntityRenderer
     {
         for (int i = 0; i < _renderers.Count; i++)
         {
-            var r = _renderers[i];
-            if (r.CanDraw(entity))
+            var renderer = _renderers[i];
+            if (renderer.CanDraw(entity))
             {
-                r.Draw(sb, world, entity, tileX, tileY);
+                renderer.Draw(sb, world, entity, tileX, tileY);
                 return;
             }
         }
@@ -31,11 +30,12 @@ public sealed class EntityRenderer : IEntityRenderer
 
     public void DrawEntities(SpriteBatch sb, World world, IEnumerable<Entity> entities)
     {
-        foreach (var e in entities)
+        foreach (var entity in entities)
         {
-            int tileX = (int)(e.Position.X / world.Config.TileSize);
-            int tileY = (int)(e.Position.Y / world.Config.TileSize);
-            Draw(sb, world, e, tileX, tileY);
+            int tileX = (int)(entity.Position.X / world.Config.TileSize);
+            int tileY = (int)(entity.Position.Y / world.Config.TileSize);
+
+            Draw(sb, world, entity, tileX, tileY);
         }
     }
 }
