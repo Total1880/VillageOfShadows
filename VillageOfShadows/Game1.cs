@@ -37,7 +37,7 @@ namespace VillageOfShadows
             // Core
             var config = new WorldConfig { TileSize = 16 };
             _world = new World(width: 120, height: 70, config);
-            _rng = new RandomAdapter(seed: 778);
+            _rng = new RandomAdapter();
 
             // Seed trees (tile entity)
             _world.TryPlaceEntityOnTile(new PineTree(), _rng.Next(5, 30), _rng.Next(5, 30));

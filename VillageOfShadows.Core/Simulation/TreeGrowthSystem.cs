@@ -10,9 +10,11 @@ public sealed class TreeGrowthSystem : IWorldSystem
     {
         var cfg = world.Config;
 
-        foreach (var tree in world.GetEntities<Tree>())
-        {
+        var trees = world.GetEntities<Tree>().ToList();
+        var saplingsToSpawn = new List<Tree>();
 
+        foreach (var tree in trees)
+        {
             float g = tree.Stage switch
             {
                 TreeStage.Sapling => tree.SaplingGrowthPerSec,
@@ -29,6 +31,7 @@ public sealed class TreeGrowthSystem : IWorldSystem
                     if (tree.Stage != TreeStage.Mature)
                         tree.Stage++;
                 }
+
                 if (tree.HasFood && tree.MaxFoodValue > tree.FoodValue)
                 {
                     tree.FoodValue += tree.FoodGrowthPerSec * dt;
@@ -37,14 +40,21 @@ public sealed class TreeGrowthSystem : IWorldSystem
             else if (tree.Stage == TreeStage.Mature)
             {
                 if (rng.NextDouble() < tree.MatureSpreadChancePerSec * dt)
-                    TrySpawnSaplingNear(world, (int)tree.Position.X, (int)tree.Position.Y, rng, tree);
+                    saplingsToSpawn.Add(tree);
             }
+        }
+
+        foreach (var parentTree in saplingsToSpawn)
+        {
+            TrySpawnSaplingNear(world, parentTree, rng);
         }
 
     }
 
-    private static void TrySpawnSaplingNear(World.World world, int x, int y, IRandom rng, Tree tree)
+    private static void TrySpawnSaplingNear(World.World world, Tree tree, IRandom rng)
     {
+        var (x, y) = world.WorldToTile(tree.Position);
+
         for (int attempt = 0; attempt < 6; attempt++)
         {
             int nx = x + rng.Next(-2, 3);

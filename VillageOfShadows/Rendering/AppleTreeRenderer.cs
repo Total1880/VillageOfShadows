@@ -90,7 +90,14 @@ namespace VillageOfShadows.Game.Rendering
                 int rowWidth = (int)(crownWidth * wf);
 
                 // x binnen die rij (iets marge zodat appels niet buiten kroon vallen)
-                int xx = rng.Next(-rowWidth / 2 + 2, rowWidth / 2 - 2);
+                int margin = Math.Min(2, Math.Max(0, rowWidth / 4));
+                int minX = -rowWidth / 2 + margin;
+                int maxX = rowWidth / 2 - margin;
+
+                if (minX > maxX)
+                    continue;
+
+                int xx = rng.Next(minX, maxX + 1);
 
                 int ax = crownCenterX + xx;
                 int ay = crownCenterY + yy;

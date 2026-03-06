@@ -6,6 +6,7 @@ namespace VillageOfShadows.Core.Entities;
 public sealed class Villager : Entity
 {
     public Movement Movement;
+    public override bool BlocksMovement => false;
 
     public Villager(Vector2 start)
     {
