@@ -1,10 +1,16 @@
-﻿namespace VillageOfShadows.Core.Entities
+﻿using VillageOfShadows.Core.Entities.Components;
+
+namespace VillageOfShadows.Core.Entities
 {
-    public class StockPile : Building
+    public sealed class Stockpile : Building
     {
-        public StockPile()
+        public StockpileKind Kind { get; set; }
+
+        public Stockpile()
         {
-            MaxInventory = 100;
+            Kind = StockpileKind.Temporary;
+            MaxInventory = 5;
+            Inventory = new List<InventoryStack>();
         }
     }
 }

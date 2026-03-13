@@ -58,8 +58,7 @@ public sealed class ChopTreeSystem : IWorldSystem
         // boom verwijderen
         world.RemoveEntity(tree.EntityId);
 
-        // hout toevoegen
-        world.Resources.Wood += tree.WoodYield;
+        StockpileHelper.DropResourceNear(world, tree.Tile.X, tree.Tile.Y, ResourceType.Wood, tree.WoodYield, 5);
 
         ResetVillager(villager);
     }

@@ -19,5 +19,7 @@ public sealed class WorldSimulation
     {
         for (int i = 0; i < _systems.Count; i++)
             _systems[i].Update(world, dt, _rng);
+
+        world.FlushEntityChanges();
     }
 }

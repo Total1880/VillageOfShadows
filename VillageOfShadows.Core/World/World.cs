@@ -18,7 +18,8 @@ public sealed class World
 
     public Dictionary<EntityId, Entity> Entities { get; } = new();
     public IReadOnlyList<Job> Jobs => _jobs;
-
+    private readonly List<Entity> _pendingAdds = new();
+    private readonly List<EntityId> _pendingRemoves = new();
     public IEnumerable<TileEntity> GetTileEntitiesOnTile(int tx, int ty)
     {
         var tile = GetTile(tx, ty);
@@ -100,10 +101,7 @@ public sealed class World
     public bool TryGetEntity(EntityId id, out Entity entity) =>
         Entities.TryGetValue(id, out entity!);
 
-    public void AddEntity(Entity entity)
-    {
-        Entities[entity.EntityId] = entity;
-    }
+    public void AddEntity(Entity entity) => _pendingAdds.Add(entity);
 
     public bool RemoveEntity(EntityId id)
     {
@@ -116,7 +114,8 @@ public sealed class World
             GetTile(tx, ty).EntityIds.Remove(id);
         }
 
-        return Entities.Remove(id);
+        _pendingRemoves.Add(id);
+        return true;
     }
 
     public bool TryPlaceTileEntity(TileEntity entity, int tx, int ty)
@@ -169,5 +168,19 @@ public sealed class World
     public void RemoveCompletedJobs()
     {
         _jobs.RemoveAll(j => j.IsCompleted);
+    }
+
+    public void RemoveEntityDeferred(EntityId id) => _pendingRemoves.Add(id);
+
+    public void FlushEntityChanges()
+    {
+        foreach (var entity in _pendingAdds)
+            Entities[entity.EntityId] = entity;
+
+        foreach (var id in _pendingRemoves)
+            Entities.Remove(id);
+
+        _pendingAdds.Clear();
+        _pendingRemoves.Clear();
     }
 }

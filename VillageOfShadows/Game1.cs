@@ -85,7 +85,8 @@ namespace VillageOfShadows
                 new PineTreeRenderer(_pixel),
                 new OakTreeRenderer(_pixel),
                 new AppleTreeRenderer(_pixel),
-                new VillagerRenderer(_pixel)
+                new VillagerRenderer(_pixel),
+                new StockpileRenderer(_pixel)
             );
 
             // World renderer tekent tiles + tile-entities via entityRenderer
