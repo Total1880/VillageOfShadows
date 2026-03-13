@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Drawing;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using VillageOfShadows.Core.Config;
 using VillageOfShadows.Core.Entities;
@@ -13,6 +14,22 @@ public sealed class World
     public Tile[] Tiles { get; }
 
     public Dictionary<EntityId, Entity> Entities { get; } = new();
+
+    public IEnumerable<TileEntity> GetTileEntitiesOnTile(int tx, int ty)
+    {
+        var tile = GetTile(tx, ty);
+
+        foreach (var id in tile.EntityIds)
+        {
+            if (Entities.TryGetValue(id, out var entity) && entity is TileEntity te)
+                yield return te;
+        }
+    }
+
+    public IEnumerable<TActor> GetActors<TActor>() where TActor : Actor
+    {
+        return Entities.Values.OfType<TActor>();
+    }
 
     public World(int width, int height, WorldConfig config)
     {
@@ -64,12 +81,6 @@ public sealed class World
         if (!tile.IsWalkable)
             return false;
 
-        foreach (var entity in GetEntitiesOnTile(tx, ty))
-        {
-            if (entity.BlocksMovement)
-                return false;
-        }
-
         return true;
     }
 
@@ -103,61 +114,35 @@ public sealed class World
         return Entities.Remove(id);
     }
 
-    public bool TryPlaceEntityOnTile(Entity entity, int tx, int ty)
+    public bool TryPlaceTileEntity(TileEntity entity, int tx, int ty)
     {
-        if (!IsWalkableTile(tx, ty))
-            return false;
+        if (!InBounds(tx, ty)) return false;
+
+        var tile = GetTile(tx, ty);
+        if (!tile.IsWalkable) return false;
 
         AddEntity(entity);
 
-        var tile = GetTile(tx, ty);
-        if (!tile.EntityIds.Contains(entity.EntityId))
-        {
-            tile.EntityIds.Add(entity.EntityId);
-        }
-
+        entity.Tile = new Point(tx, ty);
         entity.Position = TileToWorldCenter(tx, ty);
+
+        if (!tile.EntityIds.Contains(entity.EntityId))
+            tile.EntityIds.Add(entity.EntityId);
+
         return true;
     }
 
-    public bool TryMoveEntityToTile(EntityId entityId, int toTx, int toTy)
+    public bool TrySpawnActor(Actor actor, int tx, int ty)
     {
-        if (!TryGetEntity(entityId, out var entity))
-            return false;
+        if (!InBounds(tx, ty)) return false;
 
-        if (!IsWalkableTile(toTx, toTy))
-            return false;
+        var tile = GetTile(tx, ty);
+        if (!tile.IsWalkable) return false;
 
-        var (fromTx, fromTy) = WorldToTile(entity.Position);
+        AddEntity(actor);
+        actor.SetPosition(TileToWorldCenter(tx, ty));
 
-        if (InBounds(fromTx, fromTy))
-        {
-            GetTile(fromTx, fromTy).EntityIds.Remove(entityId);
-        }
-
-        var toTile = GetTile(toTx, toTy);
-        if (!toTile.EntityIds.Contains(entityId))
-        {
-            toTile.EntityIds.Add(entityId);
-        }
-
-        entity.Position = TileToWorldCenter(toTx, toTy);
         return true;
-    }
-
-    public IEnumerable<Entity> GetEntitiesOnTile(int tx, int ty)
-    {
-        if (!InBounds(tx, ty))
-            yield break;
-
-        var ids = GetTile(tx, ty).EntityIds;
-        for (int i = 0; i < ids.Count; i++)
-        {
-            if (Entities.TryGetValue(ids[i], out var entity))
-            {
-                yield return entity;
-            }
-        }
     }
 
     public IEnumerable<T> GetEntities<T>() where T : Entity

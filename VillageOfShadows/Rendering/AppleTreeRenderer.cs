@@ -75,7 +75,7 @@ namespace VillageOfShadows.Game.Rendering
             int apples = (int)tree.Stage == 2 ? (int)tree.FoodValue : 0; // bv: stage0=2, stage1=4, stage2=6...
 
             // Deterministische seed: gebruik iets stabiels (EntityId / Guid hash / int id)
-            int seed = tree.Id.GetHashCode(); // pas aan naar jouw Id property
+            int seed = tree.EntityId.GetHashCode(); // pas aan naar jouw Id property
             var rng = new Random(seed);
 
             // appel grootte: 1..2 pixels (bij grotere bomen soms 2)

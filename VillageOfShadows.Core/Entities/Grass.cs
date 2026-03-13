@@ -6,6 +6,5 @@ namespace VillageOfShadows.Core.Entities
 {
     public class Grass : Entity
     {
-        public override bool BlocksMovement => false;
     }
 }

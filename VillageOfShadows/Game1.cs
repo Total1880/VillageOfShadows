@@ -40,13 +40,13 @@ namespace VillageOfShadows
             _rng = new RandomAdapter();
 
             // Seed trees (tile entity)
-            _world.TryPlaceEntityOnTile(new PineTree(), _rng.Next(5, 30), _rng.Next(5, 30));
-            _world.TryPlaceEntityOnTile(new OakTree(), _rng.Next(5, 30), _rng.Next(5, 30));
-            _world.TryPlaceEntityOnTile(new AppleTree(), _rng.Next(5, 30), _rng.Next(5, 30));
+            _world.TryPlaceTileEntity(new PineTree(), _rng.Next(5, 30), _rng.Next(5, 30));
+            _world.TryPlaceTileEntity(new OakTree(), _rng.Next(5, 30), _rng.Next(5, 30));
+            _world.TryPlaceTileEntity(new AppleTree(), _rng.Next(5, 30), _rng.Next(5, 30));
 
             // Seed villagers (list entities)
-            _world.TryPlaceEntityOnTile(new Villager(), _rng.Next(5, 30), _rng.Next(5, 30));
-            _world.TryPlaceEntityOnTile(new Villager(), _rng.Next(5, 30), _rng.Next(5, 30));
+            _world.TrySpawnActor(new Villager(), _rng.Next(5, 30), _rng.Next(5, 30));
+            _world.TrySpawnActor(new Villager(), _rng.Next(5, 30), _rng.Next(5, 30));
 
 
             // Simulation pipeline

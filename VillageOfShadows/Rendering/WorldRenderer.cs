@@ -26,16 +26,19 @@ public sealed class WorldRenderer
             {
                 sb.Draw(_grass, new Rectangle(x * ts, y * ts, ts, ts), Color.White);
 
-                foreach (var entity in world.GetEntitiesOnTile(x, y))
+                foreach (var entity in world.GetTileEntitiesOnTile(x, y))
                 {
-                    if (entity is Villager)
-                        continue; // villagers renderen we apart
-
                     _entityRenderer.Draw(sb, world, entity, x, y);
                 }
             }
         }
 
-        _entityRenderer.DrawEntities(sb, world, world.GetEntities<Villager>());
+        foreach (var actor in world.GetEntities<Actor>())
+        {
+            int tileX = (int)(actor.Position.X / ts);
+            int tileY = (int)(actor.Position.Y / ts);
+
+            _entityRenderer.Draw(sb, world, actor, tileX, tileY);
+        }
     }
 }

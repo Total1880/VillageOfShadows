@@ -2,7 +2,7 @@
 
 namespace VillageOfShadows.Core.Entities
 {
-    public abstract class Tree : Entity
+    public abstract class Tree : TileEntity
     {
         private float _foodValue;
         public float SaplingGrowthPerSec { get; init; } = 0.030f;

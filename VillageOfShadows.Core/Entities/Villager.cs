@@ -3,11 +3,8 @@ using VillageOfShadows.Core.Entities.Components;
 
 namespace VillageOfShadows.Core.Entities;
 
-public sealed class Villager : Entity
+public sealed class Villager : Actor
 {
-    public Movement Movement;
-    public override bool BlocksMovement => false;
-
     public Villager(Vector2 start)
     {
         Position = start;
