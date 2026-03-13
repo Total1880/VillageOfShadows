@@ -1,7 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using VillageOfShadows.Core.Entities;
 using VillageOfShadows.Core.World;
 

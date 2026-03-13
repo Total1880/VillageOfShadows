@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using VillageOfShadows.Core.Config;
 using VillageOfShadows.Core.Entities;
-using VillageOfShadows.Core.Entities.Components;
 using VillageOfShadows.Core.Simulation;
 using VillageOfShadows.Core.Utils;
 using VillageOfShadows.Core.World;

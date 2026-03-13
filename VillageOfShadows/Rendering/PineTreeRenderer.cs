@@ -1,8 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using VillageOfShadows.Core.Entities;
 using VillageOfShadows.Core.World;
 
@@ -27,8 +24,8 @@ namespace VillageOfShadows.Game.Rendering
             var tree = (Tree)e;
             int ts = world.Config.TileSize;
 
-            int centerX = (int)tileX * ts + ts / 2;
-            int groundY = (int)tileY * ts + ts;
+            int centerX = tileX * ts + ts / 2;
+            int groundY = tileY * ts + ts;
 
             int trunkWidth = ts / 6;
             int trunkHeight = ts / 2;

@@ -1,8 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using VillageOfShadows.Core.Entities;
 using VillageOfShadows.Core.World;
 
@@ -55,7 +53,7 @@ namespace VillageOfShadows.Game.Rendering
 
             for (int y = -crownHeight / 2; y < crownHeight / 2; y++)
             {
-                float t = (float)y / (crownHeight / 2f);
+                float t = y / (crownHeight / 2f);
                 float widthFactor = (float)Math.Sqrt(1 - t * t); // circle shape
 
                 int width = (int)(crownWidth * widthFactor);
@@ -85,7 +83,7 @@ namespace VillageOfShadows.Game.Rendering
             {
                 // Kies random y in de kroon, en bereken de "cirkel" breedte op die y
                 int yy = rng.Next(-crownHeight / 2, crownHeight / 2);
-                float tt = (float)yy / (crownHeight / 2f);
+                float tt = yy / (crownHeight / 2f);
                 float wf = (float)Math.Sqrt(1 - tt * tt);
                 int rowWidth = (int)(crownWidth * wf);
 
