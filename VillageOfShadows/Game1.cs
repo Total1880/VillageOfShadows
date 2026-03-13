@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using System.Linq;
 using VillageOfShadows.Core.Config;
 using VillageOfShadows.Core.Entities;
+using VillageOfShadows.Core.Entities.Components;
 using VillageOfShadows.Core.Simulation;
 using VillageOfShadows.Core.Utils;
 using VillageOfShadows.Core.World;
@@ -22,6 +23,10 @@ namespace VillageOfShadows
         private IRandom _rng = null!;
         private int _prevScroll;
         private MouseState _prevMouse;
+        private KeyboardState _prevKeyboard;
+
+        private readonly BuildState _buildState = new();
+        private readonly PlacementSystem _placementSystem = new();
 
         private WorldRenderer _worldRenderer = null!;
         private Texture2D _pixel = null!;
@@ -130,9 +135,9 @@ namespace VillageOfShadows
             float panSpeed = 600f;
             Vector2 move = Vector2.Zero;
 
-            if (kb.IsKeyDown(Keys.W) || kb.IsKeyDown(Keys.Up)) move.Y -= 1;
+            if (kb.IsKeyDown(Keys.Z) || kb.IsKeyDown(Keys.Up)) move.Y -= 1;
             if (kb.IsKeyDown(Keys.S) || kb.IsKeyDown(Keys.Down)) move.Y += 1;
-            if (kb.IsKeyDown(Keys.A) || kb.IsKeyDown(Keys.Left)) move.X -= 1;
+            if (kb.IsKeyDown(Keys.Q) || kb.IsKeyDown(Keys.Left)) move.X -= 1;
             if (kb.IsKeyDown(Keys.D) || kb.IsKeyDown(Keys.Right)) move.X += 1;
 
             if (move != Vector2.Zero)
@@ -159,6 +164,20 @@ namespace VillageOfShadows
         private void HandleInput()
         {
             var mouse = Mouse.GetState();
+            var keyboard = Keyboard.GetState();
+
+            if (Pressed(keyboard, _prevKeyboard, Keys.Escape))
+            {
+                if (_buildState.IsPlacing)
+                    _buildState.CancelPlacement();
+                else if (_buildState.IsBuildMenuOpen)
+                    _buildState.IsBuildMenuOpen = false;
+                else
+                    Exit();
+            }
+
+            HandleBuildMenuInput(keyboard);
+            HandlePlacementInput(mouse);
 
             bool leftClicked =
                 mouse.LeftButton == ButtonState.Pressed &&
@@ -185,6 +204,46 @@ namespace VillageOfShadows
             }
 
             _prevMouse = mouse;
+            _prevKeyboard = keyboard;
+        }
+
+        private void HandleBuildMenuInput(KeyboardState keyboard)
+        {
+            if (Pressed(keyboard, _prevKeyboard, Keys.B))
+            {
+                _buildState.IsBuildMenuOpen = !_buildState.IsBuildMenuOpen;
+            }
+
+            if (!_buildState.IsBuildMenuOpen)
+                return;
+
+            if (Pressed(keyboard, _prevKeyboard, Keys.D1))
+            {
+                _buildState.StartPlacement(BuildType.Stockpile);
+            }
+        }
+
+        private void HandlePlacementInput(MouseState mouse)
+        {
+            if (!_buildState.IsPlacing)
+                return;
+
+            int tileX = mouse.X / _world.Config.TileSize;
+            int tileY = mouse.Y / _world.Config.TileSize;
+
+            if (LeftClicked(mouse, _prevMouse))
+            {
+                bool placed = _placementSystem.TryPlace(_world, _buildState.SelectedBuild, tileX, tileY);
+                if (placed)
+                {
+                    _buildState.CancelPlacement();
+                }
+            }
+
+            if (RightClicked(mouse, _prevMouse))
+            {
+                _buildState.CancelPlacement();
+            }
         }
 
         private void MarkTreeForChop(Tree tree)
@@ -207,6 +266,44 @@ namespace VillageOfShadows
             var inverse = Matrix.Invert(_camera.GetTransform());
             Vector2 world = Vector2.Transform(screenPoint.ToVector2(), inverse);
             return world.ToPoint();
+        }
+
+        private static bool Pressed(KeyboardState current, KeyboardState previous, Keys key)
+    => current.IsKeyDown(key) && !previous.IsKeyDown(key);
+
+        private static bool LeftClicked(MouseState current, MouseState previous)
+            => current.LeftButton == ButtonState.Pressed && previous.LeftButton == ButtonState.Released;
+
+        private static bool RightClicked(MouseState current, MouseState previous)
+            => current.RightButton == ButtonState.Pressed && previous.RightButton == ButtonState.Released;
+
+        private void DrawBuildMenu(SpriteBatch sb, SpriteFont font)
+        {
+            if (!_buildState.IsBuildMenuOpen)
+                return;
+
+            sb.Draw(_pixel, new Rectangle(20, 20, 220, 100), Color.Black * 0.7f);
+            sb.DrawString(font, "Build Menu", new Vector2(30, 30), Color.White);
+            sb.DrawString(font, "[1] Stockpile", new Vector2(30, 60), Color.White);
+        }
+
+        private void DrawPlacementPreview(SpriteBatch sb)
+        {
+            if (!_buildState.IsPlacing)
+                return;
+
+            var mouse = Mouse.GetState();
+            int ts = _world.Config.TileSize;
+            int tileX = mouse.X / ts;
+            int tileY = mouse.Y / ts;
+
+            bool canPlace = _world.InBounds(tileX, tileY)
+                && _world.GetTile(tileX, tileY).IsWalkable
+                && !_world.GetTileEntitiesOnTile(tileX, tileY).Any(e => e is Building);
+
+            Color color = canPlace ? Color.Lime * 0.4f : Color.Red * 0.4f;
+
+            sb.Draw(_pixel, new Rectangle(tileX * ts, tileY * ts, ts, ts), color);
         }
     }
 }

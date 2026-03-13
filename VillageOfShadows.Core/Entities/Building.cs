@@ -5,7 +5,7 @@ namespace VillageOfShadows.Core.Entities
     public abstract class Building : TileEntity
     {
         public float MaxInventory { get; init; } = 0;
-        public required IList<InventoryStack> Inventory { get; set; } = new List<InventoryStack>();
+        public IList<InventoryStack> Inventory { get; set; } = new List<InventoryStack>();
 
         public float InventorySize => Inventory.Sum(x => x.TotalSize);
         public float FreeInventory => MaxInventory - InventorySize;
