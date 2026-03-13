@@ -19,7 +19,7 @@ namespace VillageOfShadows.Core.Entities
             return new AppleTree
             {
                 Stage = TreeStage.Sapling,
-                FoodValue = FoodValue
+                FoodValue = 0
             };
         }
     }
