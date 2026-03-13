@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Linq;
 using VillageOfShadows.Core.Config;
 using VillageOfShadows.Core.Entities;
 using VillageOfShadows.Core.Simulation;
@@ -20,6 +21,7 @@ namespace VillageOfShadows
         private WorldSimulation _sim = null!;
         private IRandom _rng = null!;
         private int _prevScroll;
+        private MouseState _prevMouse;
 
         private WorldRenderer _worldRenderer = null!;
         private Texture2D _pixel = null!;
@@ -39,9 +41,14 @@ namespace VillageOfShadows
             _rng = new RandomAdapter();
 
             // Seed trees (tile entity)
-            _world.TryPlaceTileEntity(new PineTree(), _rng.Next(5, 30), _rng.Next(5, 30));
-            _world.TryPlaceTileEntity(new OakTree(), _rng.Next(5, 30), _rng.Next(5, 30));
-            _world.TryPlaceTileEntity(new AppleTree(), _rng.Next(5, 30), _rng.Next(5, 30));
+            for (int i = 0; i < 10; i++)
+            {
+
+
+                _world.TryPlaceTileEntity(new PineTree(), _rng.Next(5, 30), _rng.Next(5, 30));
+                _world.TryPlaceTileEntity(new OakTree(), _rng.Next(5, 30), _rng.Next(5, 30));
+                _world.TryPlaceTileEntity(new AppleTree(), _rng.Next(5, 30), _rng.Next(5, 30));
+            }
 
             // Seed villagers (list entities)
             _world.TrySpawnActor(new Villager(), _rng.Next(5, 30), _rng.Next(5, 30));
@@ -51,7 +58,9 @@ namespace VillageOfShadows
             // Simulation pipeline
             _sim = new WorldSimulation(_rng)
                 .AddSystem(new TreeGrowthSystem())
-                .AddSystem(new VillagerWanderSystem());
+                .AddSystem(new VillagerWanderSystem())
+                .AddSystem(new VillagerJobSystem())
+                .AddSystem(new ChopTreeSystem());
 
             // Camera
             _camera = new Camera2D { MinZoom = 0.5f, MaxZoom = 4f };
@@ -91,6 +100,7 @@ namespace VillageOfShadows
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             HandleCamera(dt);
+            HandleInput();
             _sim.Update(_world, dt);
 
             base.Update(gameTime);
@@ -143,6 +153,59 @@ namespace VillageOfShadows
             int worldPixelW = _world.Width * _world.Config.TileSize;
             int worldPixelH = _world.Height * _world.Config.TileSize;
             _camera.ClampToWorld(worldPixelW, worldPixelH, GraphicsDevice);
+        }
+
+        private void HandleInput()
+        {
+            var mouse = Mouse.GetState();
+
+            bool leftClicked =
+                mouse.LeftButton == ButtonState.Pressed &&
+                _prevMouse.LeftButton == ButtonState.Released;
+
+            if (leftClicked)
+            {
+                Point worldPoint = ScreenToWorld(mouse.Position);
+
+                int tx = worldPoint.X / _world.Config.TileSize;
+                int ty = worldPoint.Y / _world.Config.TileSize;
+
+                if (_world.InBounds(tx, ty))
+                {
+                    foreach (var entity in _world.GetTileEntitiesOnTile(tx, ty))
+                    {
+                        if (entity is Tree tree)
+                        {
+                            MarkTreeForChop(tree);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            _prevMouse = mouse;
+        }
+
+        private void MarkTreeForChop(Tree tree)
+        {
+            if (tree.MarkedForChop)
+                return;
+
+            bool alreadyHasJob = _world.GetJobs<ChopTreeJob>()
+                .Any(j => j.TreeId == tree.EntityId && !j.IsCompleted);
+
+            if (alreadyHasJob)
+                return;
+
+            tree.MarkedForChop = true;
+            _world.AddJob(new ChopTreeJob(tree.EntityId));
+        }
+
+        private Point ScreenToWorld(Point screenPoint)
+        {
+            var inverse = Matrix.Invert(_camera.GetTransform());
+            Vector2 world = Vector2.Transform(screenPoint.ToVector2(), inverse);
+            return world.ToPoint();
         }
     }
 }

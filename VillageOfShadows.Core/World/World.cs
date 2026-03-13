@@ -8,12 +8,16 @@ namespace VillageOfShadows.Core.World;
 
 public sealed class World
 {
+    private readonly List<Job> _jobs = new();
+
     public int Width { get; }
     public int Height { get; }
     public WorldConfig Config { get; }
     public Tile[] Tiles { get; }
+    public Resources Resources { get; }
 
     public Dictionary<EntityId, Entity> Entities { get; } = new();
+    public IReadOnlyList<Job> Jobs => _jobs;
 
     public IEnumerable<TileEntity> GetTileEntitiesOnTile(int tx, int ty)
     {
@@ -36,6 +40,7 @@ public sealed class World
         Width = width;
         Height = height;
         Config = config;
+        Resources = new Resources();
 
         Tiles = new Tile[width * height];
         for (int i = 0; i < Tiles.Length; i++)
@@ -154,5 +159,15 @@ public sealed class World
                 yield return typed;
             }
         }
+    }
+
+    public void AddJob(Job job) => _jobs.Add(job);
+
+    public IEnumerable<T> GetJobs<T>() where T : Job
+       => _jobs.OfType<T>();
+
+    public void RemoveCompletedJobs()
+    {
+        _jobs.RemoveAll(j => j.IsCompleted);
     }
 }

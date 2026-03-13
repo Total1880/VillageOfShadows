@@ -14,6 +14,9 @@ namespace VillageOfShadows.Core.Entities
         public bool HasFood { get; init; } = false;
         public float FoodValue { get { return _foodValue > MaxFoodValue ? MaxFoodValue : _foodValue; } set { _foodValue = value; } }
         public float MaxFoodValue { get; set; }
+        public bool MarkedForChop { get; set; }
+        public float ChopWorkRequired { get; set; } = 5f;
+        public int WoodYield { get; set; } = 3;
         protected Tree()
         {
             Stage = TreeStage.Sapling;

@@ -67,4 +67,11 @@ public sealed class Camera2D
 
         Position = new Vector2(x, y);
     }
+
+    public Matrix GetTransform()
+    {
+        return
+            Matrix.CreateTranslation(new Vector3(-Position, 0f)) *
+            Matrix.CreateScale(Zoom, Zoom, 1f);
+    }
 }
