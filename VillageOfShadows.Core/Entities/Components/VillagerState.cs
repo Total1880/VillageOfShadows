@@ -7,10 +7,4 @@
         Working,
         Hauling
     }
-
-    public enum BuildType
-    {
-        None,
-        Stockpile
-    }
 }

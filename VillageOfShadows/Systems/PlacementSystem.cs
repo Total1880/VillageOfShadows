@@ -1,7 +1,12 @@
-﻿using VillageOfShadows.Core.Entities;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using VillageOfShadows.Core.Entities;
 using VillageOfShadows.Core.Entities.Components;
+using VillageOfShadows.Core.World;
 
-namespace VillageOfShadows.Core.World
+namespace VillageOfShadows.Game.Systems
 {
     public sealed class PlacementSystem
     {

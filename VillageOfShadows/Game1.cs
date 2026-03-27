@@ -9,6 +9,9 @@ using VillageOfShadows.Core.Simulation;
 using VillageOfShadows.Core.Utils;
 using VillageOfShadows.Core.World;
 using VillageOfShadows.Game.Rendering;
+using VillageOfShadows.Game.State;
+using VillageOfShadows.Game.Systems;
+using VillageOfShadows.Game.UI;
 
 namespace VillageOfShadows
 {
@@ -24,9 +27,12 @@ namespace VillageOfShadows
         private int _prevScroll;
         private MouseState _prevMouse;
         private KeyboardState _prevKeyboard;
+        private SpriteFont _uiFont = null!;
 
         private readonly BuildState _buildState = new();
         private readonly PlacementSystem _placementSystem = new();
+        private BuildMenuRenderer _buildMenuRenderer = null!;
+        private PlacementPreviewRenderer _placementPreviewRenderer = null!;
 
         private WorldRenderer _worldRenderer = null!;
         private Texture2D _pixel = null!;
@@ -82,10 +88,12 @@ namespace VillageOfShadows
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
             _pixel.SetData(new[] { Color.White });
 
+            // Font
+            _uiFont = Content.Load<SpriteFont>("DefaultFont"); // pas naam aan naar jouw spritefont asset
+
             // Textures
             var grass = TextureFactory.CreateGrass(GraphicsDevice, size: 16, seed: 1337);
 
-            // Entity rendering pipeline (dispatcher)
             IEntityRenderer entityRenderer = new EntityRenderer(
                 new PineTreeRenderer(_pixel),
                 new OakTreeRenderer(_pixel),
@@ -94,8 +102,9 @@ namespace VillageOfShadows
                 new StockpileRenderer(_pixel)
             );
 
-            // World renderer tekent tiles + tile-entities via entityRenderer
             _worldRenderer = new WorldRenderer(grass, entityRenderer);
+            _buildMenuRenderer = new BuildMenuRenderer(_pixel, _uiFont);
+            _placementPreviewRenderer = new PlacementPreviewRenderer(_pixel);
         }
 
         protected override void Update(GameTime gameTime)
@@ -116,11 +125,22 @@ namespace VillageOfShadows
         {
             GraphicsDevice.Clear(Color.Black);
 
+            // World + placement preview in world space
             _sb.Begin(
                 samplerState: SamplerState.PointClamp,
                 transformMatrix: _camera.GetViewMatrix());
 
             _worldRenderer.Draw(_sb, _world);
+            var mouseWorld = ScreenToWorld(Mouse.GetState().Position);
+
+            _placementPreviewRenderer.Draw(_sb, _world, _buildState, mouseWorld);
+
+            _sb.End();
+
+            // UI in screen space
+            _sb.Begin(samplerState: SamplerState.PointClamp);
+
+            _buildMenuRenderer.Draw(_sb, _buildState);
 
             _sb.End();
 
@@ -228,8 +248,10 @@ namespace VillageOfShadows
             if (!_buildState.IsPlacing)
                 return;
 
-            int tileX = mouse.X / _world.Config.TileSize;
-            int tileY = mouse.Y / _world.Config.TileSize;
+            Point worldPoint = ScreenToWorld(mouse.Position);
+
+            int tileX = worldPoint.X / _world.Config.TileSize;
+            int tileY = worldPoint.Y / _world.Config.TileSize;
 
             if (LeftClicked(mouse, _prevMouse))
             {
@@ -292,13 +314,16 @@ namespace VillageOfShadows
             if (!_buildState.IsPlacing)
                 return;
 
-            var mouse = Mouse.GetState();
-            int ts = _world.Config.TileSize;
-            int tileX = mouse.X / ts;
-            int tileY = mouse.Y / ts;
+            Point worldPoint = ScreenToWorld(Mouse.GetState().Position);
 
-            bool canPlace = _world.InBounds(tileX, tileY)
-                && _world.GetTile(tileX, tileY).IsWalkable
+            int ts = _world.Config.TileSize;
+            int tileX = worldPoint.X / ts;
+            int tileY = worldPoint.Y / ts;
+
+            if (!_world.InBounds(tileX, tileY))
+                return;
+
+            bool canPlace = _world.GetTile(tileX, tileY).IsWalkable
                 && !_world.GetTileEntitiesOnTile(tileX, tileY).Any(e => e is Building);
 
             Color color = canPlace ? Color.Lime * 0.4f : Color.Red * 0.4f;
