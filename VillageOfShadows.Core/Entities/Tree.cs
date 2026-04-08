@@ -12,9 +12,11 @@ namespace VillageOfShadows.Core.Entities
         public TreeStage Stage { get; set; } = TreeStage.Sapling;
         public float Growth; // 0..1 progress within current stage
         public bool HasFood { get; init; } = false;
+        public bool MarkedForFoodGathering { get; set; }
         public float FoodValue { get { return _foodValue > MaxFoodValue ? MaxFoodValue : _foodValue; } set { _foodValue = value; } }
         public float MaxFoodValue { get; set; }
         public bool MarkedForChop { get; set; }
+        public float GatherFoodWorkRequired { get; set; } = 3f;
         public float ChopWorkRequired { get; set; } = 5f;
         public int WoodYield { get; set; } = 3;
         protected Tree()

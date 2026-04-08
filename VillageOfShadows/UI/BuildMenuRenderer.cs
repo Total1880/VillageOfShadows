@@ -18,11 +18,27 @@ namespace VillageOfShadows.Game.UI
             _font = font;
         }
 
-        public void Draw(SpriteBatch sb, BuildState state)
+        public void Draw(SpriteBatch sb, BuildState state, GeneralJobState generalJobState)
         {
-            if (!state.IsBuildMenuOpen)
-                return;
+            if (state.IsBuildMenuOpen)
+                DrawBuildMenu(sb);
 
+            else if (generalJobState.IsGeneralJobMenuOpen)
+                DrawJobMenu(sb);
+
+        }
+
+        private void DrawJobMenu(SpriteBatch sb)
+        {
+            sb.Draw(_pixel, new Rectangle(20, 20, 220, 100), Color.Black * 0.7f);
+
+            sb.DrawString(_font, "Job Menu", new Vector2(30, 30), Color.White);
+            sb.DrawString(_font, "[1] Chop Tree", new Vector2(30, 60), Color.White);
+            sb.DrawString(_font, "[2] Gather Food", new Vector2(30, 90), Color.White);
+        }
+
+        private void DrawBuildMenu(SpriteBatch sb)
+        {
             sb.Draw(_pixel, new Rectangle(20, 20, 220, 100), Color.Black * 0.7f);
 
             sb.DrawString(_font, "Build Menu", new Vector2(30, 30), Color.White);

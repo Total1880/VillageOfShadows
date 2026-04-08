@@ -183,4 +183,14 @@ public sealed class World
         _pendingAdds.Clear();
         _pendingRemoves.Clear();
     }
+
+    internal void RemoveFoodFromTree(EntityId entityId)
+    {
+        var entity = TryGetEntity(entityId, out var tree);
+
+        if (tree != null && tree is AppleTree)
+        {
+            ((AppleTree)tree).FoodValue = 0;
+        }
+    }
 }

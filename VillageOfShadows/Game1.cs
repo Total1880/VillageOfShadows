@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 using System.Linq;
 using VillageOfShadows.Core.Config;
 using VillageOfShadows.Core.Entities;
@@ -30,6 +31,7 @@ namespace VillageOfShadows
         private SpriteFont _uiFont = null!;
 
         private readonly BuildState _buildState = new();
+        private readonly GeneralJobState _generalJobState = new();
         private readonly PlacementSystem _placementSystem = new();
         private BuildMenuRenderer _buildMenuRenderer = null!;
         private PlacementPreviewRenderer _placementPreviewRenderer = null!;
@@ -71,6 +73,7 @@ namespace VillageOfShadows
                 .AddSystem(new TreeGrowthSystem())
                 .AddSystem(new VillagerWanderSystem())
                 .AddSystem(new VillagerJobSystem())
+                .AddSystem(new GatherFoodFromTreeSystem())
                 .AddSystem(new ChopTreeSystem());
 
             // Camera
@@ -140,7 +143,7 @@ namespace VillageOfShadows
             // UI in screen space
             _sb.Begin(samplerState: SamplerState.PointClamp);
 
-            _buildMenuRenderer.Draw(_sb, _buildState);
+            _buildMenuRenderer.Draw(_sb, _buildState, _generalJobState);
 
             _sb.End();
 
@@ -197,34 +200,58 @@ namespace VillageOfShadows
             }
 
             HandleBuildMenuInput(keyboard);
+            HandleGeneralJobMenuInput(keyboard);
             HandlePlacementInput(mouse);
+            HandleGeneralJobSelectInput(mouse);
 
-            bool leftClicked =
-                mouse.LeftButton == ButtonState.Pressed &&
-                _prevMouse.LeftButton == ButtonState.Released;
+            //bool leftClicked =
+            //    mouse.LeftButton == ButtonState.Pressed &&
+            //    _prevMouse.LeftButton == ButtonState.Released;
 
-            if (leftClicked)
-            {
-                Point worldPoint = ScreenToWorld(mouse.Position);
+            //if (leftClicked)
+            //{
+            //    Point worldPoint = ScreenToWorld(mouse.Position);
 
-                int tx = worldPoint.X / _world.Config.TileSize;
-                int ty = worldPoint.Y / _world.Config.TileSize;
+            //    int tx = worldPoint.X / _world.Config.TileSize;
+            //    int ty = worldPoint.Y / _world.Config.TileSize;
 
-                if (_world.InBounds(tx, ty))
-                {
-                    foreach (var entity in _world.GetTileEntitiesOnTile(tx, ty))
-                    {
-                        if (entity is Tree tree)
-                        {
-                            MarkTreeForChop(tree);
-                            break;
-                        }
-                    }
-                }
-            }
+            //    if (_world.InBounds(tx, ty))
+            //    {
+            //        foreach (var entity in _world.GetTileEntitiesOnTile(tx, ty))
+            //        {
+            //            if (entity is Tree tree)
+            //            {
+            //                MarkTreeForChop(tree);
+            //                break;
+            //            }
+            //        }
+            //    }
+            //}
 
             _prevMouse = mouse;
             _prevKeyboard = keyboard;
+        }
+
+
+
+        private void HandleGeneralJobMenuInput(KeyboardState keyboard)
+        {
+            if (Pressed(keyboard, _prevKeyboard, Keys.J))
+            {
+                _generalJobState.IsGeneralJobMenuOpen = !_generalJobState.IsGeneralJobMenuOpen;
+            }
+
+            if (!_generalJobState.IsGeneralJobMenuOpen)
+                return;
+
+            if (Pressed(keyboard, _prevKeyboard, Keys.D1))
+            {
+                _generalJobState.StartJob(GeneralJobType.ChopTree);
+            }
+            if (Pressed(keyboard, _prevKeyboard, Keys.D2))
+            {
+                _generalJobState.StartJob(GeneralJobType.GatherApples);
+            }
         }
 
         private void HandleBuildMenuInput(KeyboardState keyboard)
@@ -268,19 +295,24 @@ namespace VillageOfShadows
             }
         }
 
-        private void MarkTreeForChop(Tree tree)
+        private void HandleGeneralJobSelectInput(MouseState mouse)
         {
-            if (tree.MarkedForChop)
+            if (!_generalJobState.IsPlacing)
                 return;
 
-            bool alreadyHasJob = _world.GetJobs<ChopTreeJob>()
-                .Any(j => j.TreeId == tree.EntityId && !j.IsCompleted);
+            Point worldPoint = ScreenToWorld(mouse.Position);
 
-            if (alreadyHasJob)
-                return;
+            int tileX = worldPoint.X / _world.Config.TileSize;
+            int tileY = worldPoint.Y / _world.Config.TileSize;
 
-            tree.MarkedForChop = true;
-            _world.AddJob(new ChopTreeJob(tree.EntityId));
+            if (LeftClicked(mouse, _prevMouse))
+            {
+                bool placed = _placementSystem.TryPlaceGeneralJob(_world, _generalJobState.SelectedGeneralJob, tileX, tileY);
+                if (placed)
+                {
+                    _buildState.CancelPlacement();
+                }
+            }
         }
 
         private Point ScreenToWorld(Point screenPoint)
@@ -298,37 +330,5 @@ namespace VillageOfShadows
 
         private static bool RightClicked(MouseState current, MouseState previous)
             => current.RightButton == ButtonState.Pressed && previous.RightButton == ButtonState.Released;
-
-        private void DrawBuildMenu(SpriteBatch sb, SpriteFont font)
-        {
-            if (!_buildState.IsBuildMenuOpen)
-                return;
-
-            sb.Draw(_pixel, new Rectangle(20, 20, 220, 100), Color.Black * 0.7f);
-            sb.DrawString(font, "Build Menu", new Vector2(30, 30), Color.White);
-            sb.DrawString(font, "[1] Stockpile", new Vector2(30, 60), Color.White);
-        }
-
-        private void DrawPlacementPreview(SpriteBatch sb)
-        {
-            if (!_buildState.IsPlacing)
-                return;
-
-            Point worldPoint = ScreenToWorld(Mouse.GetState().Position);
-
-            int ts = _world.Config.TileSize;
-            int tileX = worldPoint.X / ts;
-            int tileY = worldPoint.Y / ts;
-
-            if (!_world.InBounds(tileX, tileY))
-                return;
-
-            bool canPlace = _world.GetTile(tileX, tileY).IsWalkable
-                && !_world.GetTileEntitiesOnTile(tileX, tileY).Any(e => e is Building);
-
-            Color color = canPlace ? Color.Lime * 0.4f : Color.Red * 0.4f;
-
-            sb.Draw(_pixel, new Rectangle(tileX * ts, tileY * ts, ts, ts), color);
-        }
     }
 }

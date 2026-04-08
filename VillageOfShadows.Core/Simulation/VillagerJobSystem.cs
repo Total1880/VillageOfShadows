@@ -19,21 +19,51 @@ public sealed class VillagerJobSystem : IWorldSystem
 
     private void TryAssignJob(World.World world, Villager villager)
     {
-        var job = world.GetJobs<ChopTreeJob>()
+        if(ChopTreeJobs(world, villager)) return;
+        if(GatherFoodJob(world, villager)) return;
+    }
+
+    private static bool ChopTreeJobs(World.World world, Villager villager)
+    {
+        var chopTreeJob = world.GetJobs<ChopTreeJob>()
             .FirstOrDefault(j => !j.IsClaimed && !j.IsCompleted);
 
-        if (job == null)
-            return;
+        if (chopTreeJob == null)
+            return false;
 
-        job.IsClaimed = true;
-        job.ClaimedByEntityId = villager.EntityId;
-        villager.CurrentJobId = job.Id;
+        chopTreeJob.IsClaimed = true;
+        chopTreeJob.ClaimedByEntityId = villager.EntityId;
+        villager.CurrentJobId = chopTreeJob.Id;
         villager.State = VillagerState.MovingToJob;
 
-        world.TryGetEntity(job.TreeId, out var tree);
+        world.TryGetEntity(chopTreeJob.TreeId, out var tree);
         if (tree != null)
         {
             villager.Movement.Target = tree.Position;
         }
+
+        return true;
+    }
+
+    private static bool GatherFoodJob(World.World world, Villager villager)
+    {
+        var gatherFoodFromTreeJob = world.GetJobs<GatherFoodFromTreeJob>()
+            .FirstOrDefault(j => !j.IsClaimed && !j.IsCompleted);
+
+        if (gatherFoodFromTreeJob == null)
+            return false;
+
+        gatherFoodFromTreeJob.IsClaimed = true;
+        gatherFoodFromTreeJob.ClaimedByEntityId = villager.EntityId;
+        villager.CurrentJobId = gatherFoodFromTreeJob.Id;
+        villager.State = VillagerState.MovingToJob;
+
+        world.TryGetEntity(gatherFoodFromTreeJob.TreeId, out var tree);
+        if (tree != null)
+        {
+            villager.Movement.Target = tree.Position;
+        }
+
+        return true;
     }
 }
