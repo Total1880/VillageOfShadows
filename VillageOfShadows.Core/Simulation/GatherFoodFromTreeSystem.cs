@@ -17,8 +17,8 @@ public sealed class GatherFoodFromTreeSystem : IWorldSystem
             var job = world.Jobs
                 .OfType<GatherFoodFromTreeJob>()
                 .FirstOrDefault(j => j.Id == villager.CurrentJobId.Value);
-
-            if (job == null || job.IsCompleted)
+            if (job == null) continue;
+            if (job.IsCompleted)
             {
                 ResetVillager(villager);
                 continue;
@@ -55,10 +55,9 @@ public sealed class GatherFoodFromTreeSystem : IWorldSystem
     {
         job.IsCompleted = true;
 
-        // boom verwijderen
-        world.RemoveFoodFromTree(tree.EntityId);
-
         StockpileHelper.DropResourceNear(world, tree.Tile.X, tree.Tile.Y, ResourceType.Apples, (int)tree.FoodValue, 5);
+
+        world.RemoveFoodFromTree(tree.EntityId);
 
         ResetVillager(villager);
     }

@@ -17,8 +17,9 @@ public sealed class ChopTreeSystem : IWorldSystem
             var job = world.Jobs
                 .OfType<ChopTreeJob>()
                 .FirstOrDefault(j => j.Id == villager.CurrentJobId.Value);
+            if (job == null) continue;
 
-            if (job == null || job.IsCompleted)
+            if (job.IsCompleted)
             {
                 ResetVillager(villager);
                 continue;
