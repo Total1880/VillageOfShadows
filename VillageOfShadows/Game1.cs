@@ -74,6 +74,7 @@ namespace VillageOfShadows
                 .AddSystem(new VillagerWanderSystem())
                 .AddSystem(new VillagerJobSystem())
                 .AddSystem(new GatherFoodFromTreeSystem())
+                .AddSystem(new GenericJobSystem())
                 .AddSystem(new ChopTreeSystem());
 
             // Camera

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using VillageOfShadows.Core.Entities;
 using VillageOfShadows.Core.Entities.Components;
+using VillageOfShadows.Core.Entities.Jobs;
 using VillageOfShadows.Core.World;
 
 namespace VillageOfShadows.Game.Systems
@@ -25,7 +26,7 @@ namespace VillageOfShadows.Game.Systems
 
             TileEntity entity = buildType switch
             {
-                BuildType.Stockpile => new Stockpile(),
+                BuildType.Stockpile => new Stockpile { Kind = StockpileKind.PlayerBuilt, MaxInventory = 20},
                 _ => throw new InvalidOperationException($"Unsupported build type: {buildType}")
             };
 

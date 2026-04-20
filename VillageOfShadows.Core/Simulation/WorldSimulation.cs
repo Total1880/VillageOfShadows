@@ -21,5 +21,6 @@ public sealed class WorldSimulation
             _systems[i].Update(world, dt, _rng);
 
         world.FlushEntityChanges();
+        world.RemoveCompletedJobs();
     }
 }

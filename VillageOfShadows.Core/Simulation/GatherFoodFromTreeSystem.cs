@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using VillageOfShadows.Core.Entities;
 using VillageOfShadows.Core.Entities.Components;
+using VillageOfShadows.Core.Entities.Jobs;
 using VillageOfShadows.Core.Utils;
 
 namespace VillageOfShadows.Core.Simulation;

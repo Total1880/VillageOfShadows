@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using VillageOfShadows.Core.Config;
 using VillageOfShadows.Core.Entities;
+using VillageOfShadows.Core.Entities.Components;
 
 namespace VillageOfShadows.Core.World;
 
@@ -192,5 +193,41 @@ public sealed class World
         {
             ((AppleTree)tree).FoodValue = 0;
         }
+    }
+
+    internal void TransferInventoryFromStockPileToActor(EntityId entityIdFrom, EntityId entityIdTo)
+    {
+        TryGetEntity(entityIdFrom, out var from);
+        TryGetEntity(entityIdTo, out var to);
+
+        var maxToTransfer = ((Actor)to).CarryCapacity;
+        var inv = ((Stockpile)from).Inventory.FirstOrDefault();
+
+        if (((Actor)to).Carrying == null && inv != null)
+        {
+            ((Actor)to).Carrying = new InventoryStack { ResourceType = inv.ResourceType, Amount = inv.Amount > maxToTransfer ? maxToTransfer : inv.Amount };
+
+            ((Stockpile)from).RemoveResource(inv.ResourceType, ((Actor)to).Carrying.Amount);
+
+            if (((Stockpile)from).Kind == StockpileKind.Temporary && ((Stockpile)from).Inventory.Count(_ => _.Amount > 0) == 0)
+                RemoveEntity(entityIdFrom);
+        }
+    }
+
+    internal void TransferInventoryFromActorToStockpile(EntityId entityIdFrom, EntityId entityIdTo)
+    {
+        TryGetEntity(entityIdFrom, out var from);
+        TryGetEntity(entityIdTo, out var to);
+
+        var maxToTransfer = ((Stockpile)to).FreeInventory;
+        var inv = ((Actor)from).Carrying;
+
+        if (inv == null) return;
+
+        var toAdd = ((Stockpile)to).AddResource(inv.ResourceType, inv.Amount);
+
+        inv.Amount -= toAdd;
+        if(inv.Amount <= 0) 
+            ((Actor)from).Carrying = null;
     }
 }

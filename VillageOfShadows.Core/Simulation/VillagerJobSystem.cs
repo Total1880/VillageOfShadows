@@ -1,5 +1,7 @@
-﻿using VillageOfShadows.Core.Entities;
+﻿using System.Numerics;
+using VillageOfShadows.Core.Entities;
 using VillageOfShadows.Core.Entities.Components;
+using VillageOfShadows.Core.Entities.Jobs;
 using VillageOfShadows.Core.Utils;
 
 namespace VillageOfShadows.Core.Simulation;
@@ -21,6 +23,28 @@ public sealed class VillagerJobSystem : IWorldSystem
     {
         if(ChopTreeJobs(world, villager)) return;
         if(GatherFoodJob(world, villager)) return;
+        if(HaulingJob(world, villager)) return;
+    }
+
+    private bool HaulingJob(World.World world, Villager villager)
+    {
+        var haulingJob = world.GetJobs<HaulingJob>()
+            .FirstOrDefault(j => !j.IsClaimed && !j.IsCompleted);
+
+        if (haulingJob == null)
+            return false;
+
+        haulingJob.IsClaimed = true;
+        haulingJob.ClaimedByEntityId = villager.EntityId;
+        villager.CurrentJobId = haulingJob.Id;
+        villager.State = VillagerState.MovingToJob;
+
+        world.TryGetEntity(haulingJob.SourceStockpileId, out var sourceStockpile);
+        if (sourceStockpile != null)
+        {
+            villager.Movement.Target = sourceStockpile.Position;
+        }
+        return true;
     }
 
     private static bool ChopTreeJobs(World.World world, Villager villager)

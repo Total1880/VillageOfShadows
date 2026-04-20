@@ -15,7 +15,7 @@ public sealed class VillagerWanderSystem : IWorldSystem
             var toTarget = v.Movement.Target - v.Position;
             float dist = toTarget.Length();
 
-            if (dist < 1)
+            if (dist < 1 && v.CurrentJobId == null)
             {
                 v.Movement.Target = PickRandomWalkableTarget(world, rng);
                 continue;

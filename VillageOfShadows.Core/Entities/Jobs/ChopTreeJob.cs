@@ -1,6 +1,6 @@
 ﻿using VillageOfShadows.Core.Entities.Components;
 
-namespace VillageOfShadows.Core.Entities
+namespace VillageOfShadows.Core.Entities.Jobs
 {
     public sealed class ChopTreeJob : Job
     {
