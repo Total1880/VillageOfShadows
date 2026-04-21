@@ -4,6 +4,7 @@
     {
         ChopTree,
         HaulWood,
-        GatherFood
+        GatherFood,
+        SearchFood
     }
 }

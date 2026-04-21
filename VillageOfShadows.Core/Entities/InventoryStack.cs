@@ -11,5 +11,14 @@ namespace VillageOfShadows.Core.Entities
 
         public int AvailableAmount => Amount - ReservedAmount;
         public float TotalSize => Amount * UnitSize;
+        public bool IsEdible
+        {
+            get
+            {
+                if (ResourceType == ResourceType.Apples) return true;
+                return false;
+            }
+        }
+        public float FoodValuePerUnit { get; init; } = 0f;
     }
 }

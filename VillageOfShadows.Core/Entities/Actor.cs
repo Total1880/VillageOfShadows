@@ -9,6 +9,7 @@ public abstract class Actor : Entity
     public InventoryStack? Carrying { get; set; }
     public int CarryCapacity { get; set; } = 2;
     public bool IsCarrying => Carrying is not null && Carrying.Amount > 0;
+    public float Hunger { get; set; } = 10f;
     public override void SetPosition(Vector2 position)
     {
         Position = position;

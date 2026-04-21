@@ -68,6 +68,18 @@ namespace VillageOfShadows.Core.Simulation
         private void CreateGenericJob(World.World world)
         {
             HaulingJob(world);
+            SearchFood(world);
+        }
+
+        private void SearchFood(World.World world)
+        {
+            var actors = world.GetActors<Villager>().Where(_ => _.State == VillagerState.Idle && _.Hunger < 5).ToList();
+
+            foreach (var actor in actors)
+            {
+                world.AddJob(new SearchFoodJob { ClaimedByEntityId = actor.EntityId, IsClaimed = true, Type = JobType.SearchFood, State = SearchFoodJobState.SearchingForFood });
+                actor.State = VillagerState.MovingToJob;
+            }
         }
 
         private bool HaulingJob(World.World world)
