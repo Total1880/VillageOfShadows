@@ -19,6 +19,6 @@ namespace VillageOfShadows.Core.Entities
                 return false;
             }
         }
-        public float FoodValuePerUnit { get; init; } = 0f;
+        public float FoodValuePerUnit { get; init; } = 1f;
     }
 }

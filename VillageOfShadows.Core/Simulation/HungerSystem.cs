@@ -61,9 +61,10 @@ namespace VillageOfShadows.Core.Simulation
 
                 if (job.State == SearchFoodJobState.MovingToFood && Vector2.DistanceSquared(actor.Position, actor.Movement.Target) < 1f)
                 {
-                    var stockpile = world.GetEntities<Stockpile>().FirstOrDefault(s => s.Position == actor.Movement.Target);
+                    var stockpile = world.GetEntities<Stockpile>().FirstOrDefault(s => s.EntityId == job.Target);
                     if (stockpile == null)
                         throw new NotImplementedException();
+
                     var foodItem = stockpile.Inventory.First(i => i.IsEdible);
                     job.State = SearchFoodJobState.Eating;
 
@@ -81,7 +82,7 @@ namespace VillageOfShadows.Core.Simulation
                     ResetVillager((Villager)actor);
                 }
 
-                nog iets doen met SearchFoodJobState.Eating, Nu kan het zijn dat stockpile leeg is, maar job blijft bestaan en al. Ook stockpile blijft bestaan indien leeg. Mss recuring job zoals removeCompletedJobs
+
             }
         }
 

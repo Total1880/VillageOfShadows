@@ -73,7 +73,6 @@ public static class StockpileHelper
             if (!world.TryPlaceTileEntity(pile, spot.x, spot.y))
                 continue;
 
-            foodvalue meegeven
             int added = pile.AddResource(type, remaining);
             remaining -= added;
         }

@@ -22,5 +22,6 @@ public sealed class WorldSimulation
 
         world.FlushEntityChanges();
         world.RemoveCompletedJobs();
+        world.RemoveEmptyTempStockpiles();
     }
 }

@@ -171,6 +171,18 @@ public sealed class World
         _jobs.RemoveAll(j => j.IsCompleted);
     }
 
+    public void RemoveEmptyTempStockpiles()
+    {
+        var tempStockpiles = GetEntities<Stockpile>().Where(s => s.Kind == StockpileKind.Temporary).ToList();
+        foreach (var stockpile in tempStockpiles)
+        {
+            if (stockpile.Inventory.All(i => i.Amount <= 0))
+            {
+                RemoveEntity(stockpile.EntityId);
+            }
+        }
+    }
+
     public void RemoveEntityDeferred(EntityId id) => _pendingRemoves.Add(id);
 
     public void FlushEntityChanges()
